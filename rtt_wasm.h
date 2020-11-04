@@ -1,10 +1,15 @@
 /***************************************************************************//**
- * @file    rtt.h
- * @brief   Arduino RT-Thread library header
+ * @file    rtt_wasm.h
+ * @brief   RT-Thread WebAssembly header
  * @author  onelife <onelife.real[at]gmail.com>
  ******************************************************************************/
-#ifndef __RTT_H__
-#define __RTT_H__
+#ifndef __RTT_WASM_H__
+#define __RTT_WASM_H__
+
+#ifdef __EMSCRIPTEN__
+# include <stdlib.h>
+# include <stdio.h>
+#endif
 
 #include "include/rtthread.h"
 #include "include/rthw.h"
@@ -12,15 +17,8 @@
 # include "components/dfs/include/dfs_posix.h"
 #endif
 
+/* Will be imported from JavaScript */
+extern void wasm_console_setup_event(void);
+extern rt_size_t wasm_console_read_buffer(rt_size_t sz);
 
-class RT_Thread {
- public:
-    void begin(void) __attribute__((noreturn));
-
- private:
-    char rtt_heap[CONFIG_HEAP_SIZE];
-};
-
-extern RT_Thread RT_T;
-
-#endif /*__RTT_H__ */
+#endif /*__RTT_WASM_H__ */

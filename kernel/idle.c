@@ -230,8 +230,13 @@ void rt_thread_idle_excute(void)
 
 static void rt_thread_idle_entry(void *parameter)
 {
+    CONTEX_START
+    CONTEX_END
     (void)parameter;
 
+    THREAD_START
+
+    THREAD_STATE_START(0)
 #ifdef RT_USING_SMP
     if (rt_hw_cpu_id() != 0)
     {
@@ -241,9 +246,13 @@ static void rt_thread_idle_entry(void *parameter)
         }
     }
 #endif
+    THREAD_STATE_END_GO(1)
 
+#ifndef __EMSCRIPTEN__
     while (1)
     {
+#endif
+    THREAD_STATE_START(1)
 #ifdef RT_USING_IDLE_HOOK
         rt_size_t i;
 
@@ -257,7 +266,12 @@ static void rt_thread_idle_entry(void *parameter)
 #endif
 
         rt_thread_idle_excute();
+    THREAD_STATE_END_GO(1)
+#ifndef __EMSCRIPTEN__
     }
+#endif
+
+    THREAD_END
 }
 
 /**

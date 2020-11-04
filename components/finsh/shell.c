@@ -142,8 +142,11 @@ static char finsh_getchar(void)
     char ch;
 
     RT_ASSERT(shell != RT_NULL);
-    while (rt_device_read(shell->device, -1, &ch, 1) != 1)
+    while (rt_device_read(shell->device, -1, &ch, 1) != 1) {
+        THREAD_YIELD_IN_CALLEE_PREPARE
         rt_sem_take(&shell->rx_sem, RT_WAITING_FOREVER);
+        THREAD_YIELD_IN_CALLEE_FROM_LOOP
+    }
 
     return ch;
 #endif
@@ -462,9 +465,14 @@ static void shell_push_history(struct finsh_shell *shell)
 
 void finsh_thread_entry(void *parameter)
 {
+    CONTEX_START
     char ch;
+    CONTEX_END
     (void)parameter;
 
+    THREAD_START
+
+    THREAD_STATE_START(0)
     /* normal is echo mode */
 #ifndef FINSH_ECHO_DISABLE_DEFAULT
     shell->echo_mode = 1;
@@ -502,11 +510,27 @@ void finsh_thread_entry(void *parameter)
 #endif
 
     rt_kprintf(FINSH_PROMPT);
+    THREAD_STATE_END_GO(1)
 
+#ifdef __EMSCRIPTEN__
+# define CONTINUE                       \
+{                                       \
+    if (ctx->yield == 0)                \
+        ctx->state = 1;                 \
+    else                                \
+        ctx->yield = 0;                 \
+    return;                             \
+}
+#else
+# define CONTINUE continue
     while (1)
     {
-        ch = finsh_getchar();
+#endif
+    THREAD_STATE_START(1)
+        CONTEX(ch) = finsh_getchar();
+    THREAD_STATE_END_GO(2)
 
+    THREAD_STATE_START(2)
         /*
          * handle control key
          * up key  : 0x1b 0x5b 0x41
@@ -514,17 +538,17 @@ void finsh_thread_entry(void *parameter)
          * right key:0x1b 0x5b 0x43
          * left key: 0x1b 0x5b 0x44
          */
-        if (ch == 0x1b)
+        if (CONTEX(ch) == 0x1b)
         {
             shell->stat = WAIT_SPEC_KEY;
-            continue;
+            CONTINUE;
         }
         else if (shell->stat == WAIT_SPEC_KEY)
         {
-            if (ch == 0x5b)
+            if (CONTEX(ch) == 0x5b)
             {
                 shell->stat = WAIT_FUNC_KEY;
-                continue;
+                CONTINUE;
             }
 
             shell->stat = WAIT_NORMAL;
@@ -533,7 +557,7 @@ void finsh_thread_entry(void *parameter)
         {
             shell->stat = WAIT_NORMAL;
 
-            if (ch == 0x41) /* up key */
+            if (CONTEX(ch) == 0x41) /* up key */
             {
 #ifdef FINSH_USING_HISTORY
                 /* prev history */
@@ -542,7 +566,7 @@ void finsh_thread_entry(void *parameter)
                 else
                 {
                     shell->current_history = 0;
-                    continue;
+                    CONTINUE;
                 }
 
                 /* copy the history command */
@@ -551,9 +575,9 @@ void finsh_thread_entry(void *parameter)
                 shell->line_curpos = shell->line_position = rt_strlen(shell->line);
                 shell_handle_history(shell);
 #endif
-                continue;
+                CONTINUE;
             }
-            else if (ch == 0x42) /* down key */
+            else if (CONTEX(ch) == 0x42) /* down key */
             {
 #ifdef FINSH_USING_HISTORY
                 /* next history */
@@ -565,7 +589,7 @@ void finsh_thread_entry(void *parameter)
                     if (shell->history_count != 0)
                         shell->current_history = shell->history_count - 1;
                     else
-                        continue;
+                        CONTINUE;
                 }
 
                 rt_memcpy(shell->line, &shell->cmd_history[shell->current_history][0],
@@ -573,9 +597,9 @@ void finsh_thread_entry(void *parameter)
                 shell->line_curpos = shell->line_position = rt_strlen(shell->line);
                 shell_handle_history(shell);
 #endif
-                continue;
+                CONTINUE;
             }
-            else if (ch == 0x44) /* left key */
+            else if (CONTEX(ch) == 0x44) /* left key */
             {
                 if (shell->line_curpos)
                 {
@@ -583,9 +607,9 @@ void finsh_thread_entry(void *parameter)
                     shell->line_curpos --;
                 }
 
-                continue;
+                CONTINUE;
             }
-            else if (ch == 0x43) /* right key */
+            else if (CONTEX(ch) == 0x43) /* right key */
             {
                 if (shell->line_curpos < shell->line_position)
                 {
@@ -593,14 +617,16 @@ void finsh_thread_entry(void *parameter)
                     shell->line_curpos ++;
                 }
 
-                continue;
+                CONTINUE;
             }
         }
 
         /* received null or error */
-        if (ch == '\0' || ch == 0xFF) continue;
+        if (CONTEX(ch) == '\0' || CONTEX(ch) == 0xFF) {
+            CONTINUE;
+        }
         /* handle tab key */
-        else if (ch == '\t')
+        else if (CONTEX(ch) == '\t')
         {
             int i;
             /* move the cursor to the beginning of line */
@@ -612,14 +638,14 @@ void finsh_thread_entry(void *parameter)
             /* re-calculate position */
             shell->line_curpos = shell->line_position = rt_strlen(shell->line);
 
-            continue;
+            CONTINUE;
         }
         /* handle backspace key */
-        else if (ch == 0x7f || ch == 0x08)
+        else if (CONTEX(ch) == 0x7f || CONTEX(ch) == 0x08)
         {
             /* note that shell->line_curpos >= 0 */
             if (shell->line_curpos == 0)
-                continue;
+                CONTINUE;
 
             shell->line_position--;
             shell->line_curpos--;
@@ -645,11 +671,11 @@ void finsh_thread_entry(void *parameter)
                 shell->line[shell->line_position] = 0;
             }
 
-            continue;
+            CONTINUE;
         }
 
         /* handle end of line, break */
-        if (ch == '\r' || ch == '\n')
+        if (CONTEX(ch) == '\r' || CONTEX(ch) == '\n')
         {
 #ifdef FINSH_USING_HISTORY
             shell_push_history(shell);
@@ -678,7 +704,7 @@ void finsh_thread_entry(void *parameter)
             rt_kprintf(FINSH_PROMPT);
             rt_memset(shell->line, 0, sizeof(shell->line));
             shell->line_curpos = shell->line_position = 0;
-            continue;
+            CONTINUE;
         }
 
         /* it's a large line, discard it */
@@ -693,7 +719,7 @@ void finsh_thread_entry(void *parameter)
             rt_memmove(&shell->line[shell->line_curpos + 1],
                        &shell->line[shell->line_curpos],
                        shell->line_position - shell->line_curpos);
-            shell->line[shell->line_curpos] = ch;
+            shell->line[shell->line_curpos] = CONTEX(ch);
             if (shell->echo_mode)
                 rt_kprintf("%s", &shell->line[shell->line_curpos]);
 
@@ -703,12 +729,12 @@ void finsh_thread_entry(void *parameter)
         }
         else
         {
-            shell->line[shell->line_position] = ch;
+            shell->line[shell->line_position] = CONTEX(ch);
             if (shell->echo_mode)
-                rt_kprintf("%c", ch);
+                rt_kprintf("%c", CONTEX(ch));
         }
 
-        ch = 0;
+        CONTEX(ch) = 0;
         shell->line_position ++;
         shell->line_curpos++;
         if (shell->line_position >= FINSH_CMD_SIZE)
@@ -717,7 +743,13 @@ void finsh_thread_entry(void *parameter)
             shell->line_position = 0;
             shell->line_curpos = 0;
         }
+    THREAD_STATE_END_GO(1)
+#ifndef __EMSCRIPTEN__
     } /* end of device read */
+#endif
+#undef CONTINUE
+
+    THREAD_END
 }
 
 void finsh_system_function_init(const void *begin, const void *end)

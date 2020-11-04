@@ -106,12 +106,6 @@ EMSCRIPTEN_KEEPALIVE
 int finsh_system_init(void);
 
 
-/* Libary Function Replacement */
-
-#define rt_strcpy(dst, src) rt_strncpy(dst, src, rt_strlen(src) + 1)
-#define rt_strcat(dst, src) rt_strcpy((char *)(dst) + rt_strlen(dst), src)
-
-
 /* WebAssembly Fix */
 
 #define CONTEX_START                    \

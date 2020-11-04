@@ -8,8 +8,6 @@
 
 #ifdef __EMSCRIPTEN__
 # include <emscripten.h>
-#else
-# define EMSCRIPTEN_KEEPALIVE
 #endif
 
 
@@ -131,7 +129,7 @@
 /* Startup Thread Config */
 
 #ifndef CONFIG_STARTUP_STACK_SIZE
-# define CONFIG_STARTUP_STACK_SIZE      (512)
+# define CONFIG_STARTUP_STACK_SIZE      (128)
 #endif
 #ifndef CONFIG_STARTUP_PRIORITY
 # define CONFIG_STARTUP_PRIORITY        (RT_THREAD_PRIORITY_MAX >> 1)
@@ -199,7 +197,7 @@
 #define FINSH_USING_DESCRIPTION
 #define FINSH_USING_HISTORY
 #define FINSH_THREAD_PRIORITY           ((RT_THREAD_PRIORITY_MAX >> 1) + (RT_THREAD_PRIORITY_MAX >> 3))
-#define FINSH_THREAD_STACK_SIZE         (2 * 512)
+#define FINSH_THREAD_STACK_SIZE         (128)
 #endif /* CONFIG_USING_FINSH */
 
 
@@ -234,6 +232,24 @@
 #endif
 
 
-#include "export.h"
+/* Libary Function Replacement */
+
+#define rt_strcpy(dst, src) rt_strncpy(dst, src, rt_strlen(src) + 1)
+#define rt_strcat(dst, src) rt_strcpy((char *)(dst) + rt_strlen(dst), src)
+
+
+#ifdef __EMSCRIPTEN__
+# include "export.h"
+#else
+# define EMSCRIPTEN_KEEPALIVE
+# define CONTEX_START
+# define CONTEX_END
+# define CONTEX(x) x
+# define THREAD_START(n)
+# define THREAD_STATE_END_GO(n)
+# define THREAD_END
+# define THREAD_YIELD_IN_CALLEE_PREPARE
+# define THREAD_YIELD_IN_CALLEE_FROM_LOOP
+#endif
 
 #endif /* __RTCONFIG_H__ */
