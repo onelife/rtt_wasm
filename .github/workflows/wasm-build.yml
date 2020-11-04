@@ -82,7 +82,7 @@ jobs:
         source /tmp/emsdk/emsdk_env.sh
         export PATH=$PATH:/tmp/wabt/build
         # Build code
-        emscons.py scons
+        python /tmp/emsdk/upstream/emscripten/emscons.py scons
 
     - name: Show files
       run:  set ; pwd ; ls -l
