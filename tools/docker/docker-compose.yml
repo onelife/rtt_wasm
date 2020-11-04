@@ -1,0 +1,24 @@
+version: '3'
+services:
+  compiler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ROOT_PASSWORD: ${ROOT_PASSWORD}
+        USER_PASSWORD: ${USER_PASSWORD}
+        EMSDK_CLONE_URL: ${EMSDK_CLONE_URL}
+        EMSDK_CLONE_BRANCH_OR_TAG: ${EMSDK_CLONE_BRANCH_OR_TAG}
+        EMSDK_CHECKOUT_REF: ${EMSDK_CHECKOUT_REF}
+    container_name: rtt_wasm
+    environment:
+      PYTHONPATH: /home/rtt
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    volumes:
+      - ../../.:/home/rtt/rtt_wasm
+    ports:
+      - "8080:8080"
+    # command: 
+    stdin_open: true
+    tty: true
