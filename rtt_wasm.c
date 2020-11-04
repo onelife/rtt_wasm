@@ -144,7 +144,7 @@ void wasm_tick_increase(void) {
 
 /* === Initialize Conponents === */
 
-#include "components/drivers/include/rtdevice.h"
+// #include "components/drivers/include/rtdevice.h"
 #if CONFIG_USING_FINSH
 # include "components/finsh/shell.h"
 #endif
