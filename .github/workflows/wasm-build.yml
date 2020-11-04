@@ -54,6 +54,8 @@ jobs:
         ./emsdk activate latest
         # Activate PATH and other environment variables in the current terminal
         source ./emsdk_env.sh
+        # Fix
+        sed -i "s/cmd, check=check/cmd, encoding='utf-8', check=check/g" ./upstream/emscripten/tools/shared.py 
         # Show version
         emcc --version
         emcc --version     
