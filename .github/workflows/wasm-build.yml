@@ -20,6 +20,7 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -72,6 +73,8 @@ jobs:
         cmake --build .
         
     - name: Build rtt_wasm
+      env:
+        EMSCRIPTEN_ROOT: /tmp/emsdk/upstream/emscripten 
       run:  |
         # Add emscripten and wabt to the PATH
         source /tmp/emsdk/emsdk_env.sh
