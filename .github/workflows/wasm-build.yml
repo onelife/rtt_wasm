@@ -15,6 +15,7 @@ jobs:
     env:
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
+      PYTHONIOENCODING: UTF-8
 
     steps:
     - uses: actions/checkout@v2
