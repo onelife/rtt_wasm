@@ -233,7 +233,7 @@ typedef int (*init_fn_t)(void);
 #define MSH_CMD_EXPORT_ALIAS(command, alias, desc)
 #elif !defined(FINSH_USING_SYMTAB)
 #define FINSH_FUNCTION_EXPORT_CMD(name, cmd, desc)
-#if defined(CONFIG_ARDUINO)
+#if defined(CONFIG_ARDUINO) || defined(__EMSCRIPTEN__)
 #define FINSH_VAR_EXPORT(name, type, desc)
 #endif
 #endif

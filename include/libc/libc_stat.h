@@ -9,7 +9,7 @@
 
 #include "rtconfig.h"
 
-#if defined(RT_USING_NEWLIB) || defined(CONFIG_ARDUINO)
+#if defined(RT_USING_NEWLIB) || defined(CONFIG_ARDUINO) || defined(__EMSCRIPTEN__)
 /* use header file of newlib */
 #include <sys/stat.h>
 

@@ -384,7 +384,7 @@ static int proc_identifier(struct finsh_parser* self, char* id)
 
     match_token(token, &(self->token), finsh_token_type_identifier);
 
-    strncpy(id, (char*)self->token.string, FINSH_NAME_MAX);
+    rt_strncpy(id, (char*)self->token.string, FINSH_NAME_MAX);
 
     return 0;
 }
@@ -983,7 +983,7 @@ void finsh_parser_run(struct finsh_parser* self, const uint8_t* string)
 
 int finsh_parser_init(struct finsh_parser* self)
 {
-    memset(self, 0, sizeof(struct finsh_parser));
+    rt_memset(self, 0, sizeof(struct finsh_parser));
 
     return 0;
 }

@@ -21,7 +21,7 @@ struct finsh_sysvar_item* global_sysvar_list;
 
 int finsh_var_init()
 {
-    memset(global_variable, 0, sizeof(global_variable));
+    rt_memset(global_variable, 0, sizeof(global_variable));
 
     return 0;
 }
@@ -34,7 +34,7 @@ int finsh_var_insert(const char* name, int type)
     for (i = 0; i < FINSH_VARIABLE_MAX; i ++)
     {
         /* there is a same name variable exist. */
-        if (strncmp(global_variable[i].name, name, FINSH_NAME_MAX) == 0)
+        if (rt_strncmp(global_variable[i].name, name, FINSH_NAME_MAX) == 0)
             return -1;
 
         if (global_variable[i].type == finsh_type_unknown && empty == -1)
@@ -47,7 +47,7 @@ int finsh_var_insert(const char* name, int type)
     if (empty == -1) return -1;
 
     /* insert entry */
-    strncpy(global_variable[empty].name, name, FINSH_NAME_MAX);
+    rt_strncpy(global_variable[empty].name, name, FINSH_NAME_MAX);
     global_variable[empty].type = type;
 
     /* return the offset */
@@ -60,14 +60,14 @@ int finsh_var_delete(const char* name)
 
     for (i = 0; i < FINSH_VARIABLE_MAX; i ++)
     {
-        if (strncmp(global_variable[i].name, name, FINSH_NAME_MAX) == 0)
+        if (rt_strncmp(global_variable[i].name, name, FINSH_NAME_MAX) == 0)
             break;
     }
 
     /* can't find variable */
     if (i == FINSH_VARIABLE_MAX) return -1;
 
-    memset(&global_variable[i], 0, sizeof(struct finsh_var));
+    rt_memset(&global_variable[i], 0, sizeof(struct finsh_var));
 
     return 0;
 }
@@ -78,7 +78,7 @@ struct finsh_var* finsh_var_lookup(const char* name)
 
     for (i = 0; i < FINSH_VARIABLE_MAX; i ++)
     {
-        if (strncmp(global_variable[i].name, name, FINSH_NAME_MAX) == 0)
+        if (rt_strncmp(global_variable[i].name, name, FINSH_NAME_MAX) == 0)
             break;
     }
 
@@ -124,7 +124,7 @@ struct finsh_sysvar* finsh_sysvar_lookup(const char* name)
          index < _sysvar_table_end;
          FINSH_NEXT_SYSVAR(index))
     {
-        if (strcmp(index->name, name) == 0)
+        if (rt_strcmp(index->name, name) == 0)
             return index;
     }
 
@@ -132,7 +132,7 @@ struct finsh_sysvar* finsh_sysvar_lookup(const char* name)
     item = global_sysvar_list;
     while (item != NULL)
     {
-        if (strncmp(item->sysvar.name, name, strlen(name)) == 0)
+        if (rt_strncmp(item->sysvar.name, name, rt_strlen(name)) == 0)
         {
             return &(item->sysvar);
         }

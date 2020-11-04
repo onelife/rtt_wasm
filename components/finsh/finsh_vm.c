@@ -110,7 +110,7 @@ struct finsh_syscall* finsh_syscall_lookup(const char* name)
 
     for (index = _syscall_table_begin; index < _syscall_table_end; FINSH_NEXT_SYSCALL(index))
     {
-        if (strcmp(index->name, name) == 0)
+        if (rt_strcmp(index->name, name) == 0)
             return index;
     }
 
@@ -118,7 +118,7 @@ struct finsh_syscall* finsh_syscall_lookup(const char* name)
     item = global_syscall_list;
     while (item != NULL)
     {
-        if (strncmp(item->syscall.name, name, strlen(name)) == 0)
+        if (rt_strncmp(item->syscall.name, name, rt_strlen(name)) == 0)
         {
             return &(item->syscall);
         }

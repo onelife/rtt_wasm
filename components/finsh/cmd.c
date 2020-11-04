@@ -192,7 +192,7 @@ long list_thread(void)
                     continue;
                 }
                 /* copy info */
-                memcpy(&thread_info, obj, sizeof thread_info);
+                rt_memcpy(&thread_info, obj, sizeof thread_info);
                 rt_hw_interrupt_enable(level);
 
                 thread = (struct rt_thread*)obj;
@@ -875,7 +875,7 @@ long list(void)
                 FINSH_NEXT_SYSCALL(index))
         {
             /* skip the internal command */
-            if (strncmp((char *)index->name, "__", 2) == 0) continue;
+            if (rt_strncmp((char *)index->name, "__", 2) == 0) continue;
 
 #ifdef FINSH_USING_DESCRIPTION
             rt_kprintf("%-16s -- %s\n", index->name, index->desc);
@@ -984,7 +984,7 @@ void list_prefix(char *prefix)
                         name_ptr = index->name;
 
                         /* set initial length */
-                        min_length = strlen(name_ptr);
+                        min_length = rt_strlen(name_ptr);
                     }
                 }
 
@@ -1021,7 +1021,7 @@ void list_prefix(char *prefix)
                     name_ptr = syscall_item->syscall.name;
 
                     /* set initial length */
-                    min_length = strlen(name_ptr);
+                    min_length = rt_strlen(name_ptr);
                 }
             }
 
@@ -1058,7 +1058,7 @@ void list_prefix(char *prefix)
                         name_ptr = index->name;
 
                         /* set initial length */
-                        min_length = strlen(name_ptr);
+                        min_length = rt_strlen(name_ptr);
 
                     }
                 }
@@ -1096,7 +1096,7 @@ void list_prefix(char *prefix)
                     name_ptr = sysvar_item->sysvar.name;
 
                     /* set initial length */
-                    min_length = strlen(name_ptr);
+                    min_length = rt_strlen(name_ptr);
                 }
             }
 

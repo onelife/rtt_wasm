@@ -39,7 +39,7 @@ static void finsh_block_merge(struct finsh_block_header** list, struct finsh_blo
 int finsh_heap_init(void)
 {
     /* clear heap to zero */
-    memset(&finsh_heap[0], 0, sizeof(finsh_heap));
+    rt_memset(&finsh_heap[0], 0, sizeof(finsh_heap));
 
     /* init free and alloc list */
     free_list           = BLOCK_HEADER(&finsh_heap[0]);
@@ -88,7 +88,7 @@ void* finsh_heap_allocate(size_t size)
     /* insert to allocate list */
     finsh_block_insert(&allocate_list, header);
 
-    memset(finsh_block_get_data(header), 0, size);
+    rt_memset(finsh_block_get_data(header), 0, size);
 
     return finsh_block_get_data(header);
 }

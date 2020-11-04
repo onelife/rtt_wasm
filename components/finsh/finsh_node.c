@@ -21,7 +21,7 @@ struct finsh_node global_node_table[FINSH_NODE_MAX];
 
 int finsh_node_init()
 {
-    memset(global_node_table, 0, sizeof(global_node_table));
+    rt_memset(global_node_table, 0, sizeof(global_node_table));
 
     return 0;
 }
@@ -163,9 +163,9 @@ struct finsh_node* finsh_node_new_string(char* s)
     }
 
     /* make string */
-    node->value.ptr = finsh_heap_allocate(strlen(s) + 1);
-    strncpy(node->value.ptr, s, strlen(s));
-    ((uint8_t*)node->value.ptr)[strlen(s)] = '\0';
+    node->value.ptr = finsh_heap_allocate(rt_strlen(s) + 1);
+    rt_strncpy(node->value.ptr, s, rt_strlen(s));
+    ((uint8_t*)node->value.ptr)[rt_strlen(s)] = '\0';
 
     return node;
 }

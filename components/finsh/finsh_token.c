@@ -57,7 +57,7 @@ static int token_proc_escape(struct finsh_token* self);
 
 void finsh_token_init(struct finsh_token* self, uint8_t* line)
 {
-    memset(self, 0, sizeof(struct finsh_token));
+    rt_memset(self, 0, sizeof(struct finsh_token));
 
     self->line = line;
 }
@@ -72,7 +72,7 @@ enum finsh_token_type finsh_token_token(struct finsh_token* self)
 
 void finsh_token_get_token(struct finsh_token* self, uint8_t* token)
 {
-    strncpy((char*)token, (char*)self->string, FINSH_NAME_MAX);
+    rt_strncpy((char*)token, (char*)self->string, FINSH_NAME_MAX);
 }
 
 int token_get_string(struct finsh_token* self, uint8_t* str)
@@ -112,7 +112,7 @@ static char token_next_char(struct finsh_token* self)
 {
     if (self->eof) return '\0';
 
-    if (self->position == (int)strlen((char*)self->line) || self->line[self->position] =='\n')
+    if (self->position == (int)rt_strlen((char*)self->line) || self->line[self->position] =='\n')
     {
             self->eof = 1;
             self->position = 0;
@@ -302,7 +302,7 @@ static int token_match_name(struct finsh_token* self, const char* str)
 
     for (i = 0; i < sizeof(finsh_name_table)/sizeof(struct name_table); i++)
     {
-        if ( strcmp(finsh_name_table[i].name, str)==0 )
+        if ( rt_strcmp(finsh_name_table[i].name, str)==0 )
         {
             self->current_token = finsh_name_table[i].type;
             return 1;
@@ -518,7 +518,7 @@ static void token_proc_number(struct finsh_token* self)
             return;
         }
 
-        self->value.int_value = token_spec_number(buf, strlen(buf), b);
+        self->value.int_value = token_spec_number(buf, rt_strlen(buf), b);
         self->current_token = finsh_token_type_value_int;
     }
     else

@@ -78,8 +78,8 @@ int msh_help(int argc, char **argv)
                 index < _syscall_table_end;
                 FINSH_NEXT_SYSCALL(index))
         {
-            if (strncmp(index->name, "__cmd_", 6) != 0) continue;
-#if defined(FINSH_USING_DESCRIPTION) && (defined(FINSH_USING_SYMTAB) || defined(CONFIG_ARDUINO))
+            if (rt_strncmp(index->name, "__cmd_", 6) != 0) continue;
+#if defined(FINSH_USING_DESCRIPTION) && (defined(FINSH_USING_SYMTAB) || defined(CONFIG_ARDUINO) || defined(__EMSCRIPTEN__))
             rt_kprintf("%-16s - %s\n", &index->name[6], index->desc);
 #else
             rt_kprintf("%s ", &index->name[6]);
@@ -171,9 +171,9 @@ static cmd_function_t msh_get_cmd(char *cmd, int size)
             index < _syscall_table_end;
             FINSH_NEXT_SYSCALL(index))
     {
-        if (strncmp(index->name, "__cmd_", 6) != 0) continue;
+        if (rt_strncmp(index->name, "__cmd_", 6) != 0) continue;
 
-        if (strncmp(&index->name[6], cmd, size) == 0 &&
+        if (rt_strncmp(&index->name[6], cmd, size) == 0 &&
                 index->name[6 + size] == '\0')
         {
             cmd_func = (cmd_function_t)index->func;
@@ -209,7 +209,7 @@ int msh_exec_module(const char *cmd_line, int size)
         return -RT_ENOMEM;
 
     /* copy command0 */
-    memcpy(pg_name, cmd_line, cmd_length);
+    rt_memcpy(pg_name, cmd_line, cmd_length);
     pg_name[cmd_length] = '\0';
 
     if (strstr(pg_name, ".mo") != RT_NULL || strstr(pg_name, ".MO") != RT_NULL)
@@ -229,7 +229,7 @@ int msh_exec_module(const char *cmd_line, int size)
         /* add .mo and open program */
 
         /* try to open program */
-        strcat(pg_name, ".mo");
+        rt_strcat(pg_name, ".mo");
         fd = open(pg_name, O_RDONLY, 0);
 
         /* search in /mo path */
@@ -293,7 +293,7 @@ static int _msh_exec_cmd(char *cmd, rt_size_t length, int *retp)
         return -RT_ERROR;
 
     /* split arguments */
-    memset(argv, 0x00, sizeof(argv));
+    rt_memset(argv, 0x00, sizeof(argv));
     argc = msh_split(cmd, length, argv);
     if (argc == 0)
         return -RT_ERROR;
@@ -430,7 +430,7 @@ void msh_auto_complete_path(char *path)
     {
         getcwd(full_path, 256);
         if (full_path[rt_strlen(full_path) - 1]  != '/')
-            strcat(full_path, "/");
+            rt_strcat(full_path, "/");
     }
     else *full_path = '\0';
 
@@ -490,13 +490,13 @@ void msh_auto_complete_path(char *path)
             if (dirent == RT_NULL) break;
 
             /* matched the prefix string */
-            if (strncmp(index, dirent->d_name, rt_strlen(index)) == 0)
+            if (rt_strncmp(index, dirent->d_name, rt_strlen(index)) == 0)
             {
                 if (min_length == 0)
                 {
                     min_length = rt_strlen(dirent->d_name);
                     /* save dirent name */
-                    strcpy(full_path, dirent->d_name);
+                    rt_strcpy(full_path, dirent->d_name);
                 }
 
                 length = str_common(dirent->d_name, full_path);
@@ -520,13 +520,13 @@ void msh_auto_complete_path(char *path)
                     dirent = readdir(dir);
                     if (dirent == RT_NULL) break;
 
-                    if (strncmp(index, dirent->d_name, rt_strlen(index)) == 0)
+                    if (rt_strncmp(index, dirent->d_name, rt_strlen(index)) == 0)
                         rt_kprintf("%s\n", dirent->d_name);
                 }
             }
 
             length = index - path;
-            memcpy(index, full_path, min_length);
+            rt_memcpy(index, full_path, min_length);
             path[length + min_length] = '\0';
         }
     }
@@ -584,17 +584,17 @@ void msh_auto_complete(char *prefix)
         for (index = _syscall_table_begin; index < _syscall_table_end; FINSH_NEXT_SYSCALL(index))
         {
             /* skip finsh shell function */
-            if (strncmp(index->name, "__cmd_", 6) != 0) continue;
+            if (rt_strncmp(index->name, "__cmd_", 6) != 0) continue;
 
             cmd_name = (const char *) &index->name[6];
-            if (strncmp(prefix, cmd_name, strlen(prefix)) == 0)
+            if (rt_strncmp(prefix, cmd_name, rt_strlen(prefix)) == 0)
             {
                 if (min_length == 0)
                 {
                     /* set name_ptr */
                     name_ptr = cmd_name;
                     /* set initial length */
-                    min_length = strlen(name_ptr);
+                    min_length = rt_strlen(name_ptr);
                 }
 
                 length = str_common(name_ptr, cmd_name);

@@ -20,7 +20,7 @@ struct finsh_syscall *_syscall_table_end    = NULL;
 struct finsh_sysvar *_sysvar_table_begin    = NULL;
 struct finsh_sysvar *_sysvar_table_end      = NULL;
 
-#elif defined(CONFIG_ARDUINO)
+#elif defined(CONFIG_ARDUINO) || defined(__EMSCRIPTEN__)
 
 # ifdef ADD_SHELL_CMD
 #  undef ADD_SHELL_CMD
