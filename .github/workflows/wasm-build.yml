@@ -31,10 +31,8 @@ jobs:
         pip install scons
 
     - name: Show locale
-      run: |
-        locale
-        python -c 'import sys, locale, os; print(sys.stdout.encoding); print(sys.stdout.isatty()); print(locale.getpreferredencoding()); print(sys.getfilesystemencoding()); print(os.environ["PYTHONIOENCODING"])'
-        
+      run: locale
+ 
     - name: Check cache for emscripten
       id:   cache-emsdk
       uses: actions/cache@v2
@@ -59,6 +57,7 @@ jobs:
         # Fix
         sed -i "s/cmd, check=check/cmd, encoding='utf-8', check=check/g" ./upstream/emscripten/tools/shared.py
         sed -i "s/open(\([^,]*\),\([^,)]*\)/open(\1,\2, encoding='utf-8'/g" ./upstream/emscripten/emscripten.py
+        sed -i "s/open(final_js)/open(final_js, encoding='utf-8')/g" ./upstream/emscripten/emcc.py
         # Show version
         emcc --version
         emcc --version     
