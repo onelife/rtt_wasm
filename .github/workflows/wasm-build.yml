@@ -31,7 +31,9 @@ jobs:
         pip install scons
 
     - name: Show locale
-      run:  locale
+      run: |
+        locale
+        python -c 'import sys; print(sys.getfilesystemencoding())'
 
     - name: Check cache for emscripten
       id:   cache-emsdk
