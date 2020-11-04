@@ -33,8 +33,8 @@ jobs:
     - name: Show locale
       run: |
         locale
-        python -c 'import sys; print(sys.getfilesystemencoding())'
-
+        python -c 'import sys, os; print(sys.stdout.encoding); print(sys.stdout.isatty()); print(locale.getpreferredencoding()); print(sys.getfilesystemencoding()); print(os.environ["PYTHONIOENCODING"])'
+        
     - name: Check cache for emscripten
       id:   cache-emsdk
       uses: actions/cache@v2
