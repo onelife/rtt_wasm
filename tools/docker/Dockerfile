@@ -9,6 +9,7 @@ ARG EMSDK_CLONE_BRANCH_OR_TAG
 ARG EMSDK_CHECKOUT_REF
 
 ENV EMSDK_PATH=/home/rtt/emsdk
+ENV EMSCRIPTEN_ROOT=/home/rtt/emsdk/upstream/emscripten 
 
 # update
 RUN apt-get update && apt-get -yq dist-upgrade \

@@ -25,7 +25,7 @@ env_main = env.Clone(
 env.Prepend(LINKFLAGS=['-s', 'SIDE_MODULE=2', '-O1'])
 
 out = env.Program(
-    'rtt_kernel.wasm',
+    'dist/rtt_kernel.wasm',
     [
         SConscript(os.path.join(d, 'SConscript'),
             exports='env',
@@ -35,7 +35,7 @@ out = env.Program(
     ]
 )
 out += env_main.Program(
-    'rtt.html',
+    'dist/rtt.html',
     [
         SConscript(os.path.join('.', 'SConscript'),
             exports='env_main',
