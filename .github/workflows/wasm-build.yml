@@ -15,7 +15,7 @@ jobs:
     env:
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
-      PYTHONIOENCODING: UTF-8
+      PYTHONIOENCODING: utf-8
 
     steps:
     - uses: actions/checkout@v2
@@ -23,7 +23,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.8'
+        python-version: '3.x'
 
     - name: Install dependencies
       run: |
