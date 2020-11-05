@@ -4,72 +4,78 @@
  * @author  onelife <onelife.real[at]gmail.com>
  ******************************************************************************/
 #ifdef FINSH_USING_MSH_ONLY
-# define ADD_FINSH_CMD(name, desc, fn, r_type, ...)
+# define ADD_FINSH_CMD(name, desc, fn)
 #else
-# define ADD_FINSH_CMD(...) ADD_SHELL_CMD("", __VA_ARGS__)
+# ifdef __EMSCRIPTEN__
+#  define ADD_FINSH_CMD(name, desc, fn) ADD_SHELL_CMD("", name, desc, fs_##fn, unsigned long, unsigned int arg)
+# else
+#  define ADD_FINSH_CMD(name, desc, fn) ADD_SHELL_CMD("", name, desc, fn, unsigned long, unsigned int arg)
+# endif
 #endif
 #ifdef FINSH_USING_MSH
-# define ADD_MSH_CMD(...) ADD_SHELL_CMD("__cmd_", __VA_ARGS__)
+# define ADD_MSH_CMD(name, desc, fn) ADD_SHELL_CMD("__cmd_", name, desc, fn, int, int argc, char **argv)
 #else
-# define ADD_MSH_CMD(name, desc, fn, r_type, ...)
+# define ADD_MSH_CMD(name, desc, fn)
 #endif
 
-ADD_FINSH_CMD(list, list available commands, list, void, void)
-ADD_FINSH_CMD(hello, say hello world, hello, void, void)
-ADD_FINSH_CMD(version, show RT-Thread version info, version, void, void)
-ADD_FINSH_CMD(list_thread, list threads, list_thread, void, void)
-ADD_MSH_CMD(help, RT-Thread shell help, msh_help, int, int argc, char **argv)
-ADD_MSH_CMD(ver, show RT-Thread version info, version, void, void)
-ADD_MSH_CMD(ps, list threads, cmd_ps, int, int argc, char **argv)
+ADD_FINSH_CMD(list, list available commands, list)
+ADD_FINSH_CMD(hello, say hello world, hello)
+ADD_FINSH_CMD(version, show RT-Thread version info, version)
+ADD_FINSH_CMD(list_thread, list threads, list_thread)
+ADD_MSH_CMD(help, RT-Thread shell help, msh_help)
+ADD_MSH_CMD(ver, show RT-Thread version info, version)
+ADD_MSH_CMD(ps, list threads, cmd_ps)
 #ifdef RT_USING_HEAP
-ADD_FINSH_CMD(list_mem, show memory usage info, list_mem, void, void)
-ADD_MSH_CMD(free, show memory usage info, cmd_free, int, int argc, char **argv)
+ADD_FINSH_CMD(list_mem, show memory usage info, list_mem)
+ADD_MSH_CMD(free, show memory usage info, cmd_free)
 # ifdef RT_USING_MEMTRACE
-ADD_MSH_CMD(mcheck, check memory, memcheck, int, void)
-ADD_MSH_CMD(mtrace, show memory trace info, memtrace, int, int argc, char **argv)
+ADD_MSH_CMD(mcheck, check memory, memcheck)
+ADD_MSH_CMD(mtrace, show memory trace info, memtrace)
 # endif
 #endif
 #ifdef RT_USING_SEMAPHORE
-ADD_FINSH_CMD(list_sem, list semaphores in system, list_sem, void, void)
-ADD_MSH_CMD(lsem, list semaphores in system, list_sem, int, int argc, char **argv)
+ADD_FINSH_CMD(list_sem, list semaphores in system, list_sem)
+ADD_MSH_CMD(lsem, list semaphores in system, list_sem)
 #endif
 #ifdef RT_USING_MUTEX
-ADD_FINSH_CMD(list_mutex, list mutex in system, list_mutex, void, void)
-ADD_MSH_CMD(lmtx, list mutex in system, list_mutex, void, void)
+ADD_FINSH_CMD(list_mutex, list mutex in system, list_mutex)
+ADD_MSH_CMD(lmtx, list mutex in system, list_mutex)
 #endif
 #ifdef RT_USING_EVENT
-ADD_FINSH_CMD(list_event, list event in system, list_event, void, void)
-ADD_MSH_CMD(levt, list event in system, list_event, void, void)
+ADD_FINSH_CMD(list_event, list event in system, list_event
+ADD_MSH_CMD(levt, list event in system, list_event)
 #endif
 #ifdef RT_USING_MAILBOX
-ADD_FINSH_CMD(list_mb, list mail box in system, list_mailbox, void, void)
-ADD_MSH_CMD(lmb, list mail box in system, list_mailbox, void, void)
+ADD_FINSH_CMD(list_mb, list mail box in system, list_mailbox)
+ADD_MSH_CMD(lmb, list mail box in system, list_mailbox)
 #endif
 #ifdef RT_USING_MESSAGEQUEUE
-ADD_FINSH_CMD(list_mq, list message queue in system, list_msgqueue, void, void)
-ADD_MSH_CMD(lmq, list message queue in system, list_msgqueue, void, void)
+ADD_FINSH_CMD(list_mq, list message queue in system, list_msgqueue)
+ADD_MSH_CMD(lmq, list message queue in system, list_msgqueue)
 #endif
 #ifdef RT_USING_MEMPOOL
-ADD_FINSH_CMD(list_memp, list memory pool in system, list_mempool, void, void)
-ADD_MSH_CMD(lmp, list memory pool in system, list_mempool, void, void)
+ADD_FINSH_CMD(list_memp, list memory pool in system, list_mempool)
+ADD_MSH_CMD(lmp, list memory pool in system, list_mempool)
 #endif
 #ifdef RT_USING_MEMHEAP
-ADD_FINSH_CMD(list_memheap, list memory heap in system, list_mempool, long, void)
-ADD_MSH_CMD(lmh, list memory heap in system, list_mempool, long, void)
+ADD_FINSH_CMD(list_memheap, list memory heap in system, list_memheap)
+ADD_MSH_CMD(lmh, list memory heap in system, list_memheap)
 #endif
-ADD_FINSH_CMD(list_timer, list timer in system, list_timer, void, void)
-ADD_MSH_CMD(ltmr, list timer in system, list_timer, void, void)
+ADD_FINSH_CMD(list_timer, list timer in system, list_timer)
+ADD_MSH_CMD(ltmr, list timer in system, list_timer)
 #ifdef RT_USING_DEVICE
-ADD_FINSH_CMD(list_dev, list device in system, list_device, void, void)
-ADD_MSH_CMD(ldev, list device in system, list_device, void, void)
+ADD_FINSH_CMD(list_dev, list device in system, list_device)
+ADD_MSH_CMD(ldev, list device in system, list_device)
 #endif
 #ifdef RT_USING_RTC
+#error todo
 ADD_FINSH_CMD(list_date, show date and time, list_date, void, void)
 ADD_FINSH_CMD(set_date, set date, set_date, rt_err_t, rt_uint32_t, rt_uint32_t, rt_uint32_t)
 ADD_FINSH_CMD(set_time, set time, set_time, rt_err_t, rt_uint32_t, rt_uint32_t, rt_uint32_t)
 ADD_MSH_CMD(date, access date and time, date, void, int argc, char **argv)
 #endif /* RT_USING_RTC */
 #ifdef RT_USING_DFS
+#error todo
 ADD_FINSH_CMD(df, show free space info of disk, df, int, const char *path)
 ADD_FINSH_CMD(list_fd, list file descriptors, list_fd, int, void)
 ADD_FINSH_CMD(mkfs, format disk with file system, mkfs, void, const char *fs_name, const char *device_name)
@@ -99,10 +105,12 @@ ADD_FINSH_CMD(list_sd, show SD info, list_sd, rt_err_t, void)
 ADD_MSH_CMD(lsd, show SD info, list_sd, rt_err_t, void)
 #endif
 #ifdef RT_USING_MODULE
+#error todo
 ADD_MSH_CMD(lsym, list symbols info, list_symbols, int, void)
 ADD_MSH_CMD(lmod, list modules in system, list_module, int, void)
 #endif
 #if CONFIG_USING_GUI
+#error todo
 # ifdef RT_USING_DFS
 ADD_FINSH_CMD(screenshot, capture screen, screenshot, void, const char *filename)
 ADD_MSH_CMD(prtscn, capture screen, prtscn, int, int argc, char **argv)

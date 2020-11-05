@@ -384,22 +384,16 @@ FINSH_FUNCTION_EXPORT_ALIAS(cmd_netstat, __cmd_netstat, list the information of 
 #endif
 #endif /* RT_USING_LWIP */
 
-int cmd_ps(int argc, char **argv)
-{
-    extern long list_thread(void);
-    extern int list_module(void);
+int cmd_ps(int argc, char **argv) {
+    extern int list_thread(int argc, char **argv);
+    extern int list_module(int argc, char **argv);
 
 #ifdef RT_USING_MODULE
     if ((argc == 2) && (rt_strcmp(argv[1], "-m") == 0))
-        list_module();
+        (void)list_module(argc, argv);
     else
 #endif
-    {
-        (void)argc;
-        (void)argv;
-        list_thread();
-    }
-    return 0;
+    return list_thread(argc, argv);
 }
 FINSH_FUNCTION_EXPORT_ALIAS(cmd_ps, __cmd_ps, List threads in the system.);
 
@@ -412,19 +406,15 @@ int cmd_time(int argc, char **argv)
 FINSH_FUNCTION_EXPORT_ALIAS(cmd_time, __cmd_time, Execute command with time.);
 
 #ifdef RT_USING_HEAP
-int cmd_free(int argc, char **argv)
-{
-    extern void list_mem(void);
-    extern void list_memheap(void);
-    (void)argc;
-    (void)argv;
+int cmd_free(int argc, char **argv) {
+    extern int list_memheap(int argc, char **argv);
+    extern int list_mem(int argc, char **argv);
 
 #ifdef RT_USING_MEMHEAP_AS_HEAP
-    list_memheap();
+    return list_memheap(argc, argv);
 #else
-    list_mem();
+    return list_mem(argc, argv);
 #endif
-    return 0;
 }
 FINSH_FUNCTION_EXPORT_ALIAS(cmd_free, __cmd_free, Show the memory usage in the system.);
 #endif

@@ -629,17 +629,20 @@ void rt_memory_info(rt_uint32_t *total,
 #ifdef RT_USING_FINSH
 #include "components/finsh/finsh.h"
 
-void list_mem(void)
-{
+int list_mem(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     rt_kprintf("total memory: %d\n", mem_size_aligned);
     rt_kprintf("used memory : %d\n", used_mem);
     rt_kprintf("maximum allocated memory: %d\n", max_mem);
+    return 0;
 }
 FINSH_FUNCTION_EXPORT(list_mem, list memory usage information)
 
 #ifdef RT_USING_MEMTRACE
-int memcheck(void)
-{
+int memcheck(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     int position;
     rt_ubase_t level;
     struct heap_mem *mem;
@@ -667,11 +670,10 @@ __exit:
 }
 MSH_CMD_EXPORT(memcheck, check memory data);
 
-int memtrace(int argc, char **argv)
-{
+int memtrace(int argc, char **argv) {
     struct heap_mem *mem;
 
-    list_mem();
+    (void)list_mem(argc, argv);
 
     rt_kprintf("\nmemory heap address:\n");
     rt_kprintf("heap_ptr: 0x%08x\n", heap_ptr);

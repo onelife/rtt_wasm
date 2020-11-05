@@ -40,19 +40,20 @@
 
 #define LIST_FIND_OBJ_NR 8
 
-long hello(void)
-{
+int hello(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     rt_kprintf("Hello RT-Thread!\n");
-
     return 0;
 }
 FINSH_FUNCTION_EXPORT(hello, say hello world);
 
 extern void rt_show_version(void);
-long version(void)
-{
-    rt_show_version();
 
+int version(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
+    rt_show_version();
     return 0;
 }
 FINSH_FUNCTION_EXPORT(version, show RT-Thread version information);
@@ -152,8 +153,9 @@ static rt_list_t *list_get_next(rt_list_t *current, list_get_next_t *arg)
     return node;
 }
 
-long list_thread(void)
-{
+int list_thread(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     rt_ubase_t level;
     list_get_next_t find_arg;
     rt_list_t *obj_list[LIST_FIND_OBJ_NR];
@@ -265,8 +267,9 @@ static void show_wait_queue(struct rt_list_node *list)
 }
 
 #ifdef RT_USING_SEMAPHORE
-long list_sem(void)
-{
+int list_sem(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     rt_ubase_t level;
     list_get_next_t find_arg;
     rt_list_t *obj_list[LIST_FIND_OBJ_NR];
@@ -332,8 +335,9 @@ MSH_CMD_EXPORT(list_sem, list semaphore in system);
 #endif
 
 #ifdef RT_USING_EVENT
-long list_event(void)
-{
+int list_event(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     rt_ubase_t level;
     list_get_next_t find_arg;
     rt_list_t *obj_list[LIST_FIND_OBJ_NR];
@@ -397,8 +401,9 @@ MSH_CMD_EXPORT(list_event, list event in system);
 #endif
 
 #ifdef RT_USING_MUTEX
-long list_mutex(void)
-{
+int list_mutex(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     rt_ubase_t level;
     list_get_next_t find_arg;
     rt_list_t *obj_list[LIST_FIND_OBJ_NR];
@@ -455,8 +460,9 @@ MSH_CMD_EXPORT(list_mutex, list mutex in system);
 #endif
 
 #ifdef RT_USING_MAILBOX
-long list_mailbox(void)
-{
+int list_mailbox(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     rt_ubase_t level;
     list_get_next_t find_arg;
     rt_list_t *obj_list[LIST_FIND_OBJ_NR];
@@ -526,8 +532,9 @@ MSH_CMD_EXPORT(list_mailbox, list mail box in system);
 #endif
 
 #ifdef RT_USING_MESSAGEQUEUE
-long list_msgqueue(void)
-{
+int list_msgqueue(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     rt_ubase_t level;
     list_get_next_t find_arg;
     rt_list_t *obj_list[LIST_FIND_OBJ_NR];
@@ -593,8 +600,9 @@ MSH_CMD_EXPORT(list_msgqueue, list message queue in system);
 #endif
 
 #ifdef RT_USING_MEMHEAP
-long list_memheap(void)
-{
+int list_memheap(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     rt_ubase_t level;
     list_get_next_t find_arg;
     rt_list_t *obj_list[LIST_FIND_OBJ_NR];
@@ -650,8 +658,9 @@ MSH_CMD_EXPORT(list_memheap, list memory heap in system);
 #endif
 
 #ifdef RT_USING_MEMPOOL
-long list_mempool(void)
-{
+int list_mempool(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     rt_ubase_t level;
     list_get_next_t find_arg;
     rt_list_t *obj_list[LIST_FIND_OBJ_NR];
@@ -720,8 +729,9 @@ FINSH_FUNCTION_EXPORT(list_mempool, list memory pool in system)
 MSH_CMD_EXPORT(list_mempool, list memory pool in system);
 #endif
 
-long list_timer(void)
-{
+int list_timer(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     rt_ubase_t level;
     list_get_next_t find_arg;
     rt_list_t *obj_list[LIST_FIND_OBJ_NR];
@@ -804,8 +814,9 @@ static char *const device_type_str[] =
     "Unknown"
 };
 
-long list_device(void)
-{
+int list_device(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     rt_ubase_t level;
     list_get_next_t find_arg;
     rt_list_t *obj_list[LIST_FIND_OBJ_NR];
@@ -860,8 +871,9 @@ FINSH_FUNCTION_EXPORT(list_device, list device in system);
 MSH_CMD_EXPORT(list_device, list device in system);
 #endif
 
-long list(void)
-{
+int list(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
 #ifndef FINSH_USING_MSH_ONLY
     struct finsh_syscall_item *syscall_item;
     struct finsh_sysvar_item *sysvar_item;
