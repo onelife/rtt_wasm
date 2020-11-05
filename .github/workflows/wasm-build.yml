@@ -23,7 +23,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.6'
+        python-version: '3.x'
 
     - name: Install dependencies
       run: |
@@ -55,9 +55,10 @@ jobs:
         # Activate PATH and other environment variables in the current terminal
         source ./emsdk_env.sh
         # Fix
-        #sed -i "s/cmd, check=check/cmd, encoding='utf-8', check=check/g" ./upstream/emscripten/tools/shared.py
-        #sed -i "s/open(\([^,]*\),\([^,)]*\)/open(\1,\2, encoding='utf-8'/g" ./upstream/emscripten/emscripten.py
-        #sed -i "s/open(final_js)/open(final_js, encoding='utf-8')/g" ./upstream/emscripten/emcc.py
+        sed -i "s/cmd, check=check/cmd, encoding='utf-8', check=check/g" ./upstream/emscripten/tools/shared.py
+        sed -i "s/open(\([^,]*\),\([^,)]*\)/open(\1,\2, encoding='utf-8'/g" ./upstream/emscripten/emscripten.py
+        sed -i "s/open(final_js)/open(final_js, encoding='utf-8')/g" ./upstream/emscripten/emcc.py
+        sed -i "s/write(do_replace\(.*\))/write(do_replace\1, encoding='utf-8')/g" ./upstream/emscripten/emcc.py
         # Show version
         emcc --version
         emcc --version     
