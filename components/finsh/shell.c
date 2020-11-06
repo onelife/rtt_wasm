@@ -622,7 +622,7 @@ void finsh_thread_entry(void *parameter)
         }
 
         /* received null or error */
-        if (CONTEX(ch) == '\0' || CONTEX(ch) == 0xFF) {
+        if (CONTEX(ch) == '\0' || CONTEX(ch) == (char)0xFF) {
             CONTINUE;
         }
         /* handle tab key */

@@ -10,6 +10,9 @@ services:
         EMSDK_CLONE_URL: ${EMSDK_CLONE_URL}
         EMSDK_CLONE_BRANCH_OR_TAG: ${EMSDK_CLONE_BRANCH_OR_TAG}
         EMSDK_CHECKOUT_REF: ${EMSDK_CHECKOUT_REF}
+        WABT_CLONE_URL: ${WABT_CLONE_URL}
+        WABT_CLONE_BRANCH_OR_TAG: ${WABT_CLONE_BRANCH_OR_TAG}
+        WABT_CHECKOUT_REF: ${WABT_CHECKOUT_REF}
     container_name: rtt_wasm
     environment:
       PYTHONPATH: /home/rtt

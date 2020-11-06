@@ -1,0 +1,7 @@
+''' RTT WebAssembly scons conifg
+'''
+Import('env_worker')
+
+objs = env_worker.Object('rtt_worker.c')
+
+Return('objs')

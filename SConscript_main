@@ -2,6 +2,6 @@
 '''
 Import('env_main')
 
-objs = env_main.Object(Glob('*.c'))
+objs = env_main.Object('rtt_main.c')
 
 Return('objs')

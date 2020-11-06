@@ -19,6 +19,5 @@
 
 /* Will be imported from JavaScript */
 extern void wasm_console_setup_event(void);
-extern rt_size_t wasm_console_read_buffer(rt_size_t sz);
 
 #endif /*__RTT_WASM_H__ */

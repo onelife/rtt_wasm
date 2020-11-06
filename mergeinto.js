@@ -5,6 +5,8 @@ mergeInto(LibraryManager.library, {
       event.preventDefault();
       if (typeof window._console_buffer !== "string")
         window._console_buffer = "";
+      if (event.isComposing || (event.keyCode === 229))
+        return;
       if (ch === 38)
         window._console_buffer += "\x1b\x5b\x41";
       else if (ch === 40)
@@ -21,21 +23,13 @@ mergeInto(LibraryManager.library, {
         window._console_buffer += "\x7f";
       else
         window._console_buffer += event.key;
-      Module.ccall('wasm_console_rx_indicate', null, ["number"], [window._console_buffer.length]);
+      Module.ccall('wasm_user_input', null, ["string", "number"], [window._console_buffer, window._console_buffer.length]);
+      window._console_buffer = "";
     });
-    document.getElementById("output").addEventListener("input", function(event) {
-      event.preventDefault();
-      console.log(event.data);
-    });
-  },
-  wasm_console_read_buffer: function(sz) {
-    if (typeof window._console_buffer !== "string")
-      return -1;
-    if (sz > window._console_buffer.length)
-      sz = window._console_buffer.length;
-    Module.ccall('wasm_console_rx_data', null, ["string", "number"], [window._console_buffer, sz]);
-    window._console_buffer = window._console_buffer.substr(sz);
-    return sz;
+    // document.getElementById("output").addEventListener("input", function(event) {
+    //   event.preventDefault();
+    //   console.log(event.data);
+    // });
   }
 });
  

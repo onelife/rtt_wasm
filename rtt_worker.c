@@ -1,6 +1,6 @@
 /***************************************************************************//**
- * @file    rtt_wasm.c
- * @brief   RT-Thread WebAssembly main
+ * @file    rtt_worker.c
+ * @brief   RT-Thread WebAssembly worker main
  * @author  onelife <onelife.real[at]gmail.com>
  ******************************************************************************/
 #include "rtt_wasm.h"
@@ -19,52 +19,106 @@ void rt_setup(void) __attribute__((weak));
 void loop(void) __attribute__((weak));
 
 void rt_setup(void) { }
-void loop(void) { rt_thread_sleep(RT_TICK_PER_SECOND); }
+void loop(void) { /*rt_thread_sleep(RT_TICK_PER_SECOND);*/ }
 
 
 
 #if CONFIG_USING_CONSOLE
 
+struct console_data {
+    rt_list_t list;
+    char *buf;
+    rt_size_t len;
+};
+
 static struct rt_device console_dev;
-static void *_dst_buf = RT_NULL;
+static rt_list_t console_in, console_out;
+
 
 static rt_err_t console_close(rt_device_t dev) {
     (void)dev;
     return RT_EOK;
 }
 
-static rt_size_t console_read(rt_device_t dev, rt_off_t pos,
-    void *buffer, rt_size_t sz) {
+static rt_size_t console_read(rt_device_t dev, rt_off_t pos, void *buf,
+    rt_size_t sz) {
+    struct console_data *node;
     rt_size_t ret;
     (void)dev;
     (void)pos;
-    _dst_buf = buffer;
-    ret = wasm_console_read_buffer(sz);
-    _dst_buf = RT_NULL;
-    *(((rt_uint8_t *)buffer) + sz) = 0;
+
+    ret = 0;
+    if (!rt_list_isempty(&console_in)) {
+        node = rt_list_entry(console_in.next, struct console_data, list);
+        ret = (sz > node->len) ? node->len : sz;
+        rt_memcpy(buf, node->buf, ret);
+        node->buf += ret;
+        node->len -= ret;
+        if (node->len == 0) {
+            rt_list_remove(&(node->list));
+            rt_free(node);
+        }
+    }
     return ret;
 }
 
-static rt_size_t console_write(rt_device_t dev, rt_off_t pos,
-    const void *buffer, rt_size_t sz) {
+static rt_size_t console_write(rt_device_t dev, rt_off_t pos, const void *buf,
+    rt_size_t sz) {
+    struct console_data *node;
     (void)dev;
     (void)pos;
-    printf(buffer);
+
+    if ((buf != RT_NULL) && (sz != 0)) {
+        node = (struct console_data *)rt_malloc(sizeof(struct console_data) + sz + 1);
+        if (!node)
+            return 0;
+
+        rt_list_init(&(node->list));
+        node->buf = (char *)node + sizeof(struct console_data);
+        node->len = sz;
+        rt_memcpy(node->buf, buf, sz + 1);
+        rt_list_insert_after(console_out.prev, &(node->list));
+    }
     return sz;
 }
 
 EMSCRIPTEN_KEEPALIVE
-void wasm_console_rx_indicate(rt_size_t sz) {
-    if (console_dev.rx_indicate != RT_NULL) {
-        console_dev.rx_indicate(&console_dev, sz);
+void wasm_concole_input(char* buf, int sz) {
+    struct console_data *node;
+
+    if ((buf != RT_NULL) && (sz != 0)) {
+        node = (struct console_data *)rt_malloc(sizeof(struct console_data) + sz + 1);
+        if (!node)
+            return;
+
+        rt_list_init(&(node->list));
+        node->buf = (char *)node + sizeof(struct console_data);
+        node->len = sz;
+        rt_memcpy(node->buf, buf, sz + 1);
+        rt_list_insert_after(console_in.prev, &(node->list));
+        printf("--- %s %d\n", node->buf, sz);
+
+        if (console_dev.rx_indicate != RT_NULL) {
+            console_dev.rx_indicate(&console_dev, sz);
+        }
     }
 }
 
 EMSCRIPTEN_KEEPALIVE
-void wasm_console_rx_data(char *buf, rt_size_t sz) {
-    if ((_dst_buf != RT_NULL) && (buf != RT_NULL) && (sz != 0))
-        rt_strncpy(_dst_buf, buf, sz);
+void wasm_concole_output(char* buf, int sz) {
+    struct console_data *node;
+    (void)buf;
+    (void)sz;
+
+    while (!rt_list_isempty(&console_out)) {
+        node = rt_list_entry(console_out.next, struct console_data, list);
+        emscripten_worker_respond_provisionally(node->buf, node->len + 1);
+        rt_list_remove(&(node->list));
+        rt_free(node);
+    }
+    emscripten_worker_respond(RT_NULL, 0);
 }
+
 
 static rt_err_t wasm_console_init(void) {
     rt_uint32_t flag = RT_DEVICE_FLAG_RDWR | \
@@ -82,7 +136,8 @@ static rt_err_t wasm_console_init(void) {
     console_dev.control      = RT_NULL;
     // console_dev.user_data    = RT_NULL;
 
-    wasm_console_setup_event();
+    rt_list_init(&console_in);
+    rt_list_init(&console_out);
 
     return rt_device_register(&console_dev, CONSOLE_NAME, flag);
 }
@@ -129,7 +184,7 @@ void rt_hw_context_switch_interrupt(rt_ubase_t from, rt_ubase_t to) {
 //     printf(str);
 // }
 
-EMSCRIPTEN_KEEPALIVE
+// EMSCRIPTEN_KEEPALIVE
 void wasm_tick_increase(void) {
     struct rt_thread *thread;
 
@@ -138,7 +193,8 @@ void wasm_tick_increase(void) {
     rt_interrupt_leave();
 
     thread = rt_thread_self();
-    ((void (*)(void *))thread->entry)(thread->parameter);
+    emscripten_async_call(thread->entry, thread->parameter, 0);
+    // ((void (*)(void *))thread->entry)(thread->parameter);
 }
 
 
@@ -171,18 +227,9 @@ extern int ulog_console_backend_init(void);
 # include <rttgui.h>
 #endif
 
-EM_JS(void, wasm_tick_init, (), {
-    console.log("wasm_tick_init called");
-    setInterval(function() {
-        Module.ccall('wasm_tick_increase', null, [], []);
-    }, 50); // CONFIG_TICK_PER_SECOND == 20
-});
-
 /* Driver init */
 void rt_driver_init(void) {
     rt_err_t ret;
-
-    wasm_tick_init();
 
     #if CONFIG_USING_CONSOLE
         ret = wasm_console_init();
@@ -261,7 +308,8 @@ void startup_thread_entry(void *param) {
     THREAD_STATE_START(1)
         /* run thread loop here */
         loop();
-        rt_thread_sleep(1);
+        rt_kprintf("startup thread sleep 10s\n");
+        rt_thread_sleep(RT_TICK_PER_SECOND * 10);
     THREAD_STATE_END_GO(1)
 
     THREAD_END
@@ -329,6 +377,8 @@ int main(void) {
     rt_setup();
     /* start scheduler */
     rt_system_scheduler_start();
+
+    emscripten_set_main_loop(wasm_tick_increase, CONFIG_TICK_PER_SECOND, 0); 
 
     return 0;
 }

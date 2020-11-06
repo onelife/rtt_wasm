@@ -7,16 +7,21 @@ ARG USER_PASSWORD
 ARG EMSDK_CLONE_URL
 ARG EMSDK_CLONE_BRANCH_OR_TAG
 ARG EMSDK_CHECKOUT_REF
+ARG WABT_CLONE_URL
+ARG WABT_CLONE_BRANCH_OR_TAG
+ARG WABT_CHECKOUT_REF
 
 ENV EMSDK_PATH=/home/rtt/emsdk
 ENV EMSCRIPTEN_ROOT=/home/rtt/emsdk/upstream/emscripten 
+ENV WABT_PATH=/home/rtt/wabt
 
 # update
 RUN apt-get update && apt-get -yq dist-upgrade \
-    && apt-get install -yq --no-install-recommends \
+    && DEBIAN_FRONTEND="noninteractive" apt-get install -yq --no-install-recommends \
         build-essential \
         python3 \
         python3-pip \
+        cmake \
         sudo \
         net-tools \
         wget \
@@ -56,3 +61,20 @@ RUN echo EMSDK_CHECKOUT_REF=$EMSDK_CHECKOUT_REF EMSDK_CLONE_BRANCH_OR_TAG=$EMSDK
 RUN $EMSDK_PATH/emsdk install latest && \
     $EMSDK_PATH/emsdk activate latest
 #RUN source "$EMSDK_PATH/emsdk_env.sh"
+
+# wabt
+RUN echo WABT_CHECKOUT_REF=$WABT_CHECKOUT_REF WABT_CLONE_BRANCH_OR_TAG=$WABT_CLONE_BRANCH_OR_TAG && \
+    git clone --recursive \
+      ${WABT_CLONE_BRANCH_OR_TAG:+-b $WABT_CLONE_BRANCH_OR_TAG} \
+      $WABT_CLONE_URL $WABT_PATH && \
+    if [ -n "$WABT_CHECKOUT_REF" ]; then \
+      cd $WABT_PATH && \
+      git checkout $WABT_CHECKOUT_REF; \
+    fi
+
+RUN cd $WABT_PATH && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    cmake --build . && \
+    export PATH=$PATH:$WABT_PATH/build

@@ -14,9 +14,9 @@
 /* User Config */
 
 
-/* Arduino Config */
+/* WebAssembly Config */
 
-// #define CONFIG_ARDUINO
+#define CONFIG_CONSOLE_BUFFER_SIZE      (128)
 #define CONFIG_TICK_PER_SECOND          (20)
 
 #ifndef CONFIG_HEAP_SIZE

@@ -79,6 +79,10 @@ void rt_system_scheduler_start(void);
 #ifdef RT_USING_HEAP
     EMSCRIPTEN_KEEPALIVE
     void rt_system_heap_init(void *begin_addr, void *end_addr);
+    EMSCRIPTEN_KEEPALIVE
+    void *rt_malloc(rt_size_t nbytes);
+    EMSCRIPTEN_KEEPALIVE
+    void rt_free(void *ptr);
 #endif /* RT_USING_HEAP */
 EMSCRIPTEN_KEEPALIVE
 rt_device_t rt_device_find(const char *name);
@@ -96,6 +100,8 @@ void rt_kprintf(const char *fmt, ...);
     rt_device_t rt_console_set_device(const char *name);
     // rt_device_t rt_console_get_device(void);
 #endif
+EMSCRIPTEN_KEEPALIVE
+void *rt_memcpy(void *dest, const void *src, rt_ubase_t n);
 EMSCRIPTEN_KEEPALIVE
 char *rt_strncpy(char *dest, const char *src, rt_ubase_t n);
 EMSCRIPTEN_KEEPALIVE

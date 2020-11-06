@@ -13,11 +13,19 @@ env.Tool('emscripten')
 env.Prepend(CPPPATH=['#'])
 env.Prepend(CCFLAGS=['-fPIC'])
 env.Prepend(CPPDEFINES=rttcfg)
+env_worker = env.Clone(
+    LINKFLAGS=['-s', 'MAIN_MODULE=2',
+    '-s', 'BUILD_AS_WORKER=1',
+    '--pre-js', 'pre_lib.js',
+    # '-s', 'EXPORTED_FUNCTIONS=["_main"]',
+    # '-s', 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall"]',
+    # '-s', 'MODULARIZE=1',
+],
+)
 env_main = env.Clone(
     LINKFLAGS=['-s', 'MAIN_MODULE=2',
     '--js-library', 'mergeinto.js',
-    '--pre-js', 'pre_lib.js',
-    '-s', 'EXPORTED_FUNCTIONS=["_main"]',
+    # '-s', 'EXPORTED_FUNCTIONS=["_main"]',
     '-s', 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall"]',
     # '-s', 'MODULARIZE=1',
 ],
@@ -34,10 +42,19 @@ out = env.Program(
         for d in os.listdir('.') if os.path.isfile(os.path.join('.', d, 'SConscript'))
     ]
 )
+out += env_worker.Program(
+    'dist/rtt_worker.js',
+    [
+        SConscript(os.path.join('.', 'SConscript_worker'),
+            exports='env_worker',
+            variant_dir='build',
+            duplicate=0)
+    ]
+)
 out += env_main.Program(
     'dist/rtt.html',
     [
-        SConscript(os.path.join('.', 'SConscript'),
+        SConscript(os.path.join('.', 'SConscript_main'),
             exports='env_main',
             variant_dir='build',
             duplicate=0)
