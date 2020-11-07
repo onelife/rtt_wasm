@@ -173,7 +173,7 @@ static const char *get_month_str(uint8_t month)
 
 RT_WEAK rt_size_t syslog_formater(char *log_buf, int level, const char *tag, rt_bool_t newline, const char *format, va_list args)
 {
-    extern size_t ulog_strcpy(size_t cur_len, char *dst, const char *src);
+    extern rt_size_t ulog_strcpy(rt_size_t cur_len, char *dst, const char *src);
 
     rt_size_t log_len = 0, newline_len = rt_strlen(ULOG_NEWLINE_SIGN);
     int fmt_result;

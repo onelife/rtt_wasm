@@ -107,12 +107,19 @@ char *rt_strncpy(char *dest, const char *src, rt_ubase_t n);
 EMSCRIPTEN_KEEPALIVE
 void rt_show_version(void);
 
-
+#ifdef RT_USING_FINSH
 EMSCRIPTEN_KEEPALIVE
 int finsh_system_init(void);
+#endif
 
+#ifdef RT_USING_ULOG
+    EMSCRIPTEN_KEEPALIVE
+    void ulog_output(rt_uint32_t level, const char *tag, rt_bool_t newline, const char *format, ...);
+    EMSCRIPTEN_KEEPALIVE
+    int wasm_ulog_backend_init(void);
+#endif
 
-/* WebAssembly Fix */
+/* WebAssembly Patch */
 
 #define CONTEX_START                    \
 struct {                                \

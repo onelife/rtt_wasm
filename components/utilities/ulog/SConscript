@@ -1,0 +1,9 @@
+''' RTT WebAssembly scons conifg
+'''
+import os
+Import('env')
+
+env.Append(CPPPATH=['.'])
+objs = env.Object(Glob('*.c') + Glob(os.path.join('syslog', '*.c')) + Glob(os.path.join('backend', '*.c')))
+
+Return('objs')

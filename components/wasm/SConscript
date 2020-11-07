@@ -1,0 +1,8 @@
+''' RTT WebAssembly scons conifg
+'''
+Import('env')
+
+env.Append(CPPPATH=['.'])
+objs = env.Object(Glob('*.c'))
+
+Return('objs')

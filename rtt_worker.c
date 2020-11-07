@@ -119,7 +119,6 @@ void wasm_concole_output(char* buf, int sz) {
     emscripten_worker_respond(RT_NULL, 0);
 }
 
-
 static rt_err_t wasm_console_init(void) {
     rt_uint32_t flag = RT_DEVICE_FLAG_RDWR | \
                        RT_DEVICE_FLAG_STREAM | \
@@ -216,9 +215,7 @@ void wasm_tick_increase(void) {
 # define LOG_E(format, args...) rt_kprintf(format "\n", ##args)
 # define LOG_I(format, args...) rt_kprintf(format "\n", ##args)
 #endif
-#ifdef ULOG_BACKEND_USING_CONSOLE
-extern int ulog_console_backend_init(void);
-#endif
+extern int wasm_ulog_backend_init(void);
 #ifdef RT_USING_MODULE
 # include "components/libc/libdl/dlmodule.h"
 #endif
@@ -247,10 +244,8 @@ void rt_high_driver_init(void) {
 
 /* Component init */
 void rt_components_init(void) {
-    #ifdef ULOG_BACKEND_USING_CONSOLE
-        (void)ulog_console_backend_init();
-    #elif defined(RT_USING_ULOG)
-        (void)ulog_init();
+    #ifdef RT_USING_ULOG
+        (void)wasm_ulog_backend_init();
     #endif
 
     /* INIT_BOARD_EXPORT */
@@ -378,7 +373,8 @@ int main(void) {
     /* start scheduler */
     rt_system_scheduler_start();
 
-    emscripten_set_main_loop(wasm_tick_increase, CONFIG_TICK_PER_SECOND, 0); 
+    emscripten_log(EM_LOG_CONSOLE, "RT-Thread in WebAssembly");
+    emscripten_set_main_loop(wasm_tick_increase, CONFIG_TICK_PER_SECOND, 0);
 
     return 0;
 }

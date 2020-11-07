@@ -54,7 +54,7 @@
 
 /* output log default color definition */
 #ifndef ULOG_COLOR_DEBUG
-#define ULOG_COLOR_DEBUG               NULL
+#define ULOG_COLOR_DEBUG               RT_NULL
 #endif
 #ifndef ULOG_COLOR_INFO
 #define ULOG_COLOR_INFO                (F_GREEN)
@@ -112,11 +112,11 @@ struct rt_ulog
 static const char * const level_output_info[] =
 {
         "A/",
-        NULL,
-        NULL,
+        RT_NULL,
+        RT_NULL,
         "E/",
         "W/",
-        NULL,
+        RT_NULL,
         "I/",
         "D/",
 };
@@ -126,11 +126,11 @@ static const char * const level_output_info[] =
 static const char * const color_output_info[] =
 {
         ULOG_COLOR_ASSERT,
-        NULL,
-        NULL,
+        RT_NULL,
+        RT_NULL,
         ULOG_COLOR_ERROR,
         ULOG_COLOR_WARN,
-        NULL,
+        RT_NULL,
         ULOG_COLOR_INFO,
         ULOG_COLOR_DEBUG,
 };
@@ -139,7 +139,7 @@ static const char * const color_output_info[] =
 /* ulog local object */
 static struct rt_ulog ulog = { 0 };
 
-size_t ulog_strcpy(size_t cur_len, char *dst, const char *src)
+rt_size_t ulog_strcpy(rt_size_t cur_len, char *dst, const char *src)
 {
     const char *src_old = src;
 
@@ -161,9 +161,9 @@ size_t ulog_strcpy(size_t cur_len, char *dst, const char *src)
     return src - src_old;
 }
 
-size_t ulog_ultoa(char *s, unsigned long int n)
+rt_size_t ulog_ultoa(char *s, unsigned long int n)
 {
-    size_t i = 0, j = 0, len = 0;
+    rt_size_t i = 0, j = 0, len = 0;
     char swap;
 
     do
@@ -224,7 +224,7 @@ static char *get_log_buf(void)
         return ulog.log_buf_isr;
 #else
         rt_kprintf("Error: Current mode not supported run in ISR. Please enable ULOG_USING_ISR_LOG.\n");
-        return NULL;
+        return RT_NULL;
 #endif
     }
 }
@@ -260,7 +260,7 @@ RT_WEAK rt_size_t ulog_formater(char *log_buf, rt_uint32_t level, const char *ta
         static time_t now;
         static struct tm *tm, tm_tmp;
 
-        now = time(NULL);
+        now = time(RT_NULL);
         tm = gmtime_r(&now, &tm_tmp);
 
 #ifdef RT_USING_SOFT_RTC
@@ -462,9 +462,14 @@ static void do_output(rt_uint32_t level, const char *tag, rt_bool_t is_raw, cons
         /* We can't ensure that all backends support ISR context output.
          * So only using rt_kprintf when context is ISR */
         extern void ulog_console_backend_output(struct ulog_backend *backend, rt_uint32_t level, const char *tag,
-                rt_bool_t is_raw, const char *log, size_t len);
-        ulog_console_backend_output(NULL, level, tag, is_raw, log_buf, log_len);
+                rt_bool_t is_raw, const char *log, rt_size_t len);
+        ulog_console_backend_output(RT_NULL, level, tag, is_raw, log_buf, log_len);
 #endif /* ULOG_BACKEND_USING_CONSOLE */
+#ifdef __EMSCRIPTEN__
+        extern void wasm_ulog_backend_output(struct ulog_backend *be, rt_uint32_t lvl,
+            const char *tag, rt_bool_t is_raw, const char *log, rt_size_t len);
+        wasm_ulog_backend_output(RT_NULL, level, tag, is_raw, log_buf, log_len);
+#endif
     }
 #endif /* ULOG_USING_ASYNC_OUTPUT */
 }
@@ -480,7 +485,7 @@ static void do_output(rt_uint32_t level, const char *tag, rt_bool_t is_raw, cons
  */
 void ulog_voutput(rt_uint32_t level, const char *tag, rt_bool_t newline, const char *format, va_list args)
 {
-    char *log_buf = NULL;
+    char *log_buf = RT_NULL;
     rt_size_t log_len = 0;
 
 #ifndef ULOG_USING_SYSLOG
@@ -584,7 +589,7 @@ void ulog_output(rt_uint32_t level, const char *tag, rt_bool_t newline, const ch
 void ulog_raw(const char *format, ...)
 {
     rt_size_t log_len = 0;
-    char *log_buf = NULL;
+    char *log_buf = RT_NULL;
     va_list args;
     int fmt_result;
 
@@ -617,7 +622,7 @@ void ulog_raw(const char *format, ...)
     }
 
     /* do log output */
-    do_output(LOG_LVL_DBG, NULL, RT_TRUE, log_buf, log_len);
+    do_output(LOG_LVL_DBG, RT_NULL, RT_TRUE, log_buf, log_len);
 
     /* unlock output */
     output_unlock();
@@ -637,7 +642,7 @@ void ulog_hexdump(const char *tag, rt_size_t width, rt_uint8_t *buf, rt_size_t s
 
     rt_size_t i, j;
     rt_size_t log_len = 0, name_len = rt_strlen(tag);
-    char *log_buf = NULL, dump_string[8];
+    char *log_buf = RT_NULL, dump_string[8];
     int fmt_result;
 
     RT_ASSERT(ulog.init_ok);
@@ -727,7 +732,7 @@ void ulog_hexdump(const char *tag, rt_size_t width, rt_uint8_t *buf, rt_size_t s
         /* package newline sign */
         log_len += ulog_strcpy(log_len, log_buf + log_len, ULOG_NEWLINE_SIGN);
         /* do log output */
-        do_output(LOG_LVL_DBG, NULL, RT_TRUE, log_buf, log_len);
+        do_output(LOG_LVL_DBG, RT_NULL, RT_TRUE, log_buf, log_len);
     }
     /* unlock output */
     output_unlock();
@@ -758,7 +763,7 @@ void ulog_hexdump(const char *tag, rt_size_t width, rt_uint8_t *buf, rt_size_t s
 int ulog_tag_lvl_filter_set(const char *tag, rt_uint32_t level)
 {
     rt_slist_t *node;
-    ulog_tag_lvl_filter_t tag_lvl = NULL;
+    ulog_tag_lvl_filter_t tag_lvl = RT_NULL;
     int result = RT_EOK;
 
     if (level > LOG_FILTER_LVL_ALL)
@@ -779,7 +784,7 @@ int ulog_tag_lvl_filter_set(const char *tag, rt_uint32_t level)
         }
         else
         {
-            tag_lvl = NULL;
+            tag_lvl = RT_NULL;
         }
     }
     /* find OK */
@@ -834,7 +839,7 @@ int ulog_tag_lvl_filter_set(const char *tag, rt_uint32_t level)
 rt_uint32_t ulog_tag_lvl_filter_get(const char *tag)
 {
     rt_slist_t *node;
-    ulog_tag_lvl_filter_t tag_lvl = NULL;
+    ulog_tag_lvl_filter_t tag_lvl = RT_NULL;
     rt_uint32_t level = LOG_FILTER_LVL_ALL;
 
     if (!ulog.init_ok)
@@ -1060,7 +1065,7 @@ static void ulog_filter(uint8_t argc, char **argv)
 #endif
     const char *tag = ulog_global_filter_tag_get(), *kw = ulog_global_filter_kw_get();
     rt_slist_t *node;
-    ulog_tag_lvl_filter_t tag_lvl = NULL;
+    ulog_tag_lvl_filter_t tag_lvl = RT_NULL;
 
     rt_kprintf("--------------------------------------\n");
     rt_kprintf("ulog global filter:\n");
@@ -1159,7 +1164,7 @@ void ulog_async_output(void)
     rt_rbb_blk_t log_blk;
     ulog_frame_t log_frame;
 
-    while ((log_blk = rt_rbb_blk_get(ulog.async_rbb)) != NULL)
+    while ((log_blk = rt_rbb_blk_get(ulog.async_rbb)) != RT_NULL)
     {
         log_frame = (ulog_frame_t) log_blk->buf;
         if (log_frame->magic == ULOG_FRAME_MAGIC)
@@ -1235,7 +1240,7 @@ int ulog_init(void)
     RT_ASSERT(ULOG_ASYNC_OUTPUT_STORE_LINES >= 2);
     /* async output ring block buffer */
     ulog.async_rbb = rt_rbb_create(RT_ALIGN(ULOG_ASYNC_OUTPUT_BUF_SIZE, RT_ALIGN_SIZE), ULOG_ASYNC_OUTPUT_STORE_LINES);
-    if (ulog.async_rbb == NULL)
+    if (ulog.async_rbb == RT_NULL)
     {
         rt_kprintf("Error: ulog init failed! No memory for async rbb.\n");
         rt_mutex_detach(&ulog.output_locker);
@@ -1244,7 +1249,7 @@ int ulog_init(void)
     /* async output thread */
     ulog.async_th = rt_thread_create("ulog_async", async_output_thread_entry, &ulog, ULOG_ASYNC_OUTPUT_THREAD_STACK,
             ULOG_ASYNC_OUTPUT_THREAD_PRIORITY, 20);
-    if (ulog.async_th == NULL)
+    if (ulog.async_th == RT_NULL)
     {
         rt_kprintf("Error: ulog init failed! No memory for async output thread.\n");
         rt_mutex_detach(&ulog.output_locker);

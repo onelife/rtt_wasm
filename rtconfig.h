@@ -43,7 +43,7 @@
 #endif
 
 #ifndef CONFIG_USING_LOG
-# define CONFIG_USING_LOG               (0) //(1)
+# define CONFIG_USING_LOG               (1)
 #endif
 
 #ifndef CONFIG_USING_MODULE
@@ -65,7 +65,7 @@
 # define RT_USING_ULOG
 # define ULOG_OUTPUT_LVL                (LOG_LVL_DBG) // (LOG_LVL_INFO)
 # define ULOG_ASSERT_ENABLE
-# define ULOG_USING_COLOR
+// # define ULOG_USING_COLOR
 // # define ULOG_USING_ISR_LOG
 // # define ULOG_USING_SYSLOG
 // # define ULOG_USING_FILTER
@@ -74,8 +74,8 @@
 # define ULOG_OUTPUT_LEVEL
 # define ULOG_OUTPUT_TAG
 # define ULOG_OUTPUT_THREAD_NAME
-# if (CONFIG_USING_CONSOLE)
-#  define ULOG_BACKEND_USING_CONSOLE
+# ifdef ULOG_BACKEND_USING_CONSOLE
+#  undef ULOG_BACKEND_USING_CONSOLE
 # endif 
 #endif /* CONFIG_USING_LOG */
 
