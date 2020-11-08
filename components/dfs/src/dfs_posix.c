@@ -606,7 +606,7 @@ DIR *opendir(const char *name)
         }
         else
         {
-            memset(t, 0, sizeof(DIR));
+            rt_memset(t, 0, sizeof(DIR));
 
             t->fd = fd;
         }
@@ -846,7 +846,7 @@ int chdir(const char *path)
     closedir(d);
 
     /* copy full path to working directory */
-    strncpy(working_directory, fullpath, DFS_PATH_MAX);
+    rt_strncpy(working_directory, fullpath, DFS_PATH_MAX);
     /* release normalize directory path name */
     rt_free(fullpath);
 
@@ -895,7 +895,7 @@ char *getcwd(char *buf, size_t size)
 {
 #ifdef DFS_USING_WORKDIR
     dfs_lock();
-    strncpy(buf, working_directory, size);
+    rt_strncpy(buf, working_directory, size);
     dfs_unlock();
 #else
     rt_kprintf(NO_WORKING_DIR);

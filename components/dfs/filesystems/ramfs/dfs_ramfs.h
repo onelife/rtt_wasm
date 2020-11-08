@@ -12,8 +12,9 @@
 #ifndef __DFS_RAMFS_H__
 #define __DFS_RAMFS_H__
 
-#include <rtthread.h>
-#include <rtservice.h>
+#include "include/rtthread.h"
+
+#ifdef RT_USING_DFS_RAMFS
 
 #define RAMFS_NAME_MAX  32
 #define RAMFS_MAGIC     0x0A0A0A0A
@@ -43,5 +44,6 @@ struct dfs_ramfs
 int dfs_ramfs_init(void);
 struct dfs_ramfs *dfs_ramfs_create(rt_uint8_t *pool, rt_size_t size);
 
-#endif
+#endif /* RT_USING_DFS_RAMFS */
 
+#endif /* __DFS_RAMFS_H__ */

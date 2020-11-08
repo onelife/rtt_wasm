@@ -23,42 +23,33 @@
 extern char working_directory[];
 #endif
 
-int cmd_ls(int argc, char **argv)
-{
-    extern void ls(const char *pathname);
-
-    if (argc == 1)
-    {
+extern int ls(int argc, char **argv);
+#define ls_(x) ls((int)x, RT_NULL)
+int cmd_ls(int argc, char **argv) {
+    if (argc == 1) {
 #ifdef DFS_USING_WORKDIR
-        ls(working_directory);
+        ls_(working_directory);
 #else
-        ls("/");
+        ls_("/");
 #endif
-    }
-    else
-    {
-        ls(argv[1]);
+    } else {
+        ls_(argv[1]);
     }
 
     return 0;
 }
 FINSH_FUNCTION_EXPORT_ALIAS(cmd_ls, __cmd_ls, List information about the FILEs.);
 
-int cmd_cp(int argc, char **argv)
-{
-    void copy(const char *src, const char *dst);
-
-    if (argc != 3)
-    {
+extern int copy(int argc, char **argv);
+#define copy_(x, y) copy((int)x, (char **)y)
+int cmd_cp(int argc, char **argv) {
+    if (argc != 3) {
         rt_kprintf("Usage: cp SOURCE DEST\n");
         rt_kprintf("Copy SOURCE to DEST.\n");
+        return -1;
+    } else {
+        return copy_(argv[1], argv[2]);
     }
-    else
-    {
-        copy(argv[1], argv[2]);
-    }
-
-    return 0;
 }
 FINSH_FUNCTION_EXPORT_ALIAS(cmd_cp, __cmd_cp, Copy SOURCE to DEST.);
 
@@ -121,21 +112,20 @@ int cmd_mv(int argc, char **argv)
 }
 FINSH_FUNCTION_EXPORT_ALIAS(cmd_mv, __cmd_mv, Rename SOURCE to DEST.);
 
-int cmd_cat(int argc, char **argv)
-{
-    int index;
-    extern void cat(const char *filename);
 
-    if (argc == 1)
-    {
+extern int cat(int argc, char **argv);
+#define cat_(x) cat((int)x, RT_NULL)
+int cmd_cat(int argc, char **argv) {
+    int index;
+
+    if (argc == 1) {
         rt_kprintf("Usage: cat [FILE]...\n");
         rt_kprintf("Concatenate FILE(s)\n");
         return 0;
     }
 
-    for (index = 1; index < argc; index ++)
-    {
-        cat(argv[index]);
+    for (index = 1; index < argc; index ++) {
+        cat_(argv[index]);
     }
 
     return 0;
@@ -239,22 +229,16 @@ int cmd_mkfs(int argc, char **argv)
 }
 FINSH_FUNCTION_EXPORT_ALIAS(cmd_mkfs, __cmd_mkfs, format disk with file system);
 
-extern int df(const char *path);
-int cmd_df(int argc, char** argv)
-{
-    if (argc != 2)
-    {
-        df("/");
-    }
-    else
-    {
-        if ((rt_strcmp(argv[1], "--help") == 0) || (rt_strcmp(argv[1], "-h") == 0))
-        {
+extern int df(int argc, char **argv);
+#define df_(x) df((int)x, RT_NULL)
+int cmd_df(int argc, char** argv) {
+    if (argc != 2) {
+        df_("/");
+    } else {
+        if ((rt_strcmp(argv[1], "--help") == 0) || (rt_strcmp(argv[1], "-h") == 0)) {
             rt_kprintf("df [path]\n");
-        }
-        else
-        {
-            df(argv[1]);
+        } else {
+            df_(argv[1]);
         }
     }
 

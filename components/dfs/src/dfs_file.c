@@ -488,15 +488,15 @@ __exit:
 
 static struct dfs_fd fd;
 static struct dirent dirent;
-void ls(const char *pathname)
-{
+int ls(int argc, char **argv) {
+    const char *pathname = (const char *)argc;
     struct stat stat;
     int length;
     char *fullpath, *path;
+    (void)argv;
 
     fullpath = NULL;
-    if (pathname == NULL)
-    {
+    if (pathname == NULL) {
 #ifdef DFS_USING_WORKDIR
         /* open current working directory */
         path = rt_strdup(working_directory);
@@ -504,91 +504,82 @@ void ls(const char *pathname)
         path = rt_strdup("/");
 #endif
         if (path == NULL)
-            return ; /* out of memory */
-    }
-    else
-    {
+            return -1; /* out of memory */
+    } else {
         path = (char *)pathname;
     }
 
     /* list directory */
-    if (dfs_file_open(&fd, path, O_DIRECTORY) == 0)
-    {
+    if (dfs_file_open(&fd, path, O_DIRECTORY) == 0) {
         rt_kprintf("Directory %s:\n", path);
-        do
-        {
-            memset(&dirent, 0, sizeof(struct dirent));
+        do {
+            rt_memset(&dirent, 0, sizeof(struct dirent));
             length = dfs_file_getdents(&fd, &dirent, sizeof(struct dirent));
-            if (length > 0)
-            {
-                memset(&stat, 0, sizeof(struct stat));
+            if (length > 0) {
+                rt_memset(&stat, 0, sizeof(struct stat));
 
                 /* build full path for each file */
                 fullpath = dfs_normalize_path(path, dirent.d_name);
                 if (fullpath == NULL)
                     break;
 
-                if (dfs_file_stat(fullpath, &stat) == 0)
-                {
+                if (dfs_file_stat(fullpath, &stat) == 0) {
                     rt_kprintf("%-20s", dirent.d_name);
                     if (S_ISDIR(stat.st_mode))
-                    {
                         rt_kprintf("%-25s\n", "<DIR>");
-                    }
                     else
-                    {
                         rt_kprintf("%-25lu\n", stat.st_size);
-                    }
-                }
-                else
+                } else {
                     rt_kprintf("BAD file: %s\n", dirent.d_name);
+                }
                 rt_free(fullpath);
             }
-        }while(length > 0);
+        } while (length > 0);
 
         dfs_file_close(&fd);
-    }
-    else
-    {
+    } else {
         rt_kprintf("No such directory\n");
     }
+
     if (pathname == NULL)
         rt_free(path);
+    return 0;
 }
 FINSH_FUNCTION_EXPORT(ls, list directory contents);
 
-void rm(const char *filename)
-{
-    if (dfs_file_unlink(filename) < 0)
-    {
+int rm(int argc, char **argv) {
+    const char *filename = (const char *)argc;
+    (void)argv;
+
+    if (dfs_file_unlink(filename) < 0) {
         rt_kprintf("Delete %s failed\n", filename);
+        return -1;
     }
+    return 0;
 }
 FINSH_FUNCTION_EXPORT(rm, remove files or directories);
 
-void cat(const char* filename)
-{
+int cat(int argc, char **argv) {
+    const char *filename = (const char *)argc;
+    (void)argv;
     uint32_t length;
     char buffer[81];
 
-    if (dfs_file_open(&fd, filename, O_RDONLY) < 0)
-    {
+    if (dfs_file_open(&fd, filename, O_RDONLY) < 0) {
         rt_kprintf("Open %s failed\n", filename);
-
-        return;
+        return -1;
     }
 
-    do
-    {
-        memset(buffer, 0, sizeof(buffer));
-        length = dfs_file_read(&fd, buffer, sizeof(buffer)-1 );
-        if (length > 0)
-        {
+    do {
+        rt_memset(buffer, 0, sizeof(buffer));
+        length = dfs_file_read(&fd, buffer, sizeof(buffer) - 1);
+        if (length > 0) {
             rt_kprintf("%s", buffer);
         }
-    }while (length > 0);
+    } while (length > 0);
 
     dfs_file_close(&fd);
+    return 0;
 }
 FINSH_FUNCTION_EXPORT(cat, print file);
 
@@ -661,7 +652,7 @@ static void copydir(const char * src, const char * dst)
 
     do
     {
-        memset(&dirent, 0, sizeof(struct dirent));
+        rt_memset(&dirent, 0, sizeof(struct dirent));
 
         length = dfs_file_getdents(&cpfd, &dirent, sizeof(struct dirent));
         if (length > 0)
@@ -669,7 +660,7 @@ static void copydir(const char * src, const char * dst)
             char * src_entry_full = NULL;
             char * dst_entry_full = NULL;
 
-            if (strcmp(dirent.d_name, "..") == 0 || strcmp(dirent.d_name, ".") == 0)
+            if (rt_strcmp(dirent.d_name, "..") == 0 || rt_strcmp(dirent.d_name, ".") == 0)
                 continue;
 
             /* build full path for each file */
@@ -685,7 +676,7 @@ static void copydir(const char * src, const char * dst)
                 break;
             }
 
-            memset(&stat, 0, sizeof(struct stat));
+            rt_memset(&stat, 0, sizeof(struct stat));
             if (dfs_file_stat(src_entry_full, &stat) != 0)
             {
                 rt_kprintf("open file: %s failed\n", dirent.d_name);
@@ -718,8 +709,8 @@ static const char *_get_path_lastname(const char *path)
     /* skip the '/' then return */
     return ++ptr;
 }
-void copy(const char *src, const char *dst)
-{
+
+int copy(int argc, char **argv) {
 #define FLAG_SRC_TYPE      0x03
 #define FLAG_SRC_IS_DIR    0x01
 #define FLAG_SRC_IS_FILE   0x02
@@ -730,26 +721,24 @@ void copy(const char *src, const char *dst)
 #define FLAG_DST_IS_FILE   0x08
 #define FLAG_DST_NON_EXSIT 0x00
 
+    const char *src = (const char *)argc;
+    const char *dst = (const char *)argv;
     struct stat stat;
     uint32_t flag = 0;
 
     /* check the staus of src and dst */
-    if (dfs_file_stat(src, &stat) < 0)
-    {
+    if (dfs_file_stat(src, &stat) < 0) {
         rt_kprintf("copy failed, bad %s\n", src);
-        return;
+        return -1;
     }
     if (S_ISDIR(stat.st_mode))
         flag |= FLAG_SRC_IS_DIR;
     else
         flag |= FLAG_SRC_IS_FILE;
 
-    if (dfs_file_stat(dst, &stat) < 0)
-    {
+    if (dfs_file_stat(dst, &stat) < 0) {
         flag |= FLAG_DST_NON_EXSIT;
-    }
-    else
-    {
+    } else {
         if (S_ISDIR(stat.st_mode))
             flag |= FLAG_DST_IS_DIR;
         else
@@ -757,57 +746,45 @@ void copy(const char *src, const char *dst)
     }
 
     //2. check status
-    if ((flag & FLAG_SRC_IS_DIR) && (flag & FLAG_DST_IS_FILE))
-    {
+    if ((flag & FLAG_SRC_IS_DIR) && (flag & FLAG_DST_IS_FILE)) {
         rt_kprintf("cp faild, cp dir to file is not permitted!\n");
-        return ;
+        return -1;
     }
 
     //3. do copy
-    if (flag & FLAG_SRC_IS_FILE)
-    {
-        if (flag & FLAG_DST_IS_DIR)
-        {
+    if (flag & FLAG_SRC_IS_FILE) {
+        if (flag & FLAG_DST_IS_DIR) {
             char * fdst;
             fdst = dfs_normalize_path(dst, _get_path_lastname(src));
-            if (fdst == NULL)
-            {
+            if (fdst == NULL) {
                 rt_kprintf("out of memory\n");
-                return;
+                return -1;
             }
             copyfile(src, fdst);
             rt_free(fdst);
-        }
-        else
-        {
+        } else {
             copyfile(src, dst);
         }
-    }
-    else //flag & FLAG_SRC_IS_DIR
-    {
-        if (flag & FLAG_DST_IS_DIR)
-        {
+    } else { //flag & FLAG_SRC_IS_DIR
+        if (flag & FLAG_DST_IS_DIR) {
             char * fdst;
             fdst = dfs_normalize_path(dst, _get_path_lastname(src));
-            if (fdst == NULL)
-            {
+            if (fdst == NULL) {
                 rt_kprintf("out of memory\n");
-                return;
+                return -1;
             }
             mkdir(fdst, 0);
             copydir(src, fdst);
             rt_free(fdst);
-        }
-        else if ((flag & FLAG_DST_TYPE) == FLAG_DST_NON_EXSIT)
-        {
+        } else if ((flag & FLAG_DST_TYPE) == FLAG_DST_NON_EXSIT) {
             mkdir(dst, 0);
             copydir(src, dst);
-        }
-        else
-        {
+        } else {
             copydir(src, dst);
         }
     }
+
+    return 0;
 }
 FINSH_FUNCTION_EXPORT(copy, copy file or dir)
 

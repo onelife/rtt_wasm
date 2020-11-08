@@ -12,7 +12,7 @@
 
 
 /* User Config */
-
+// #define CONFIG_USING_RAMFS              (1)
 
 /* WebAssembly Config */
 
@@ -52,6 +52,10 @@
 
 #ifndef CONFIG_USING_GUI
 # define CONFIG_USING_GUI               (0)
+#endif
+
+#ifndef CONFIG_USING_RAMFS
+# define CONFIG_USING_RAMFS             (0)
 #endif
 
 #ifndef CONFIG_USING_EXFAT
@@ -162,7 +166,9 @@
 /* Memory Management Config */
 
 #define RT_USING_MEMPOOL                /* Required by SIG, GUI */
-// #define RT_USING_MEMHEAP
+#if (CONFIG_USING_RAMFS)
+# define RT_USING_MEMHEAP               /* Required by ramfs */
+#endif
 #define RT_USING_HEAP
 #define RT_USING_SMALL_MEM
 
@@ -203,23 +209,25 @@
 
 /* File System Config */
 
-#if 0
+#if (CONFIG_USING_RAMFS)
+# define CONFIG_RAMFS_SIZE              (1024)
 # define RT_USING_DFS
 // # define RT_USING_DFS_MNTTABLE          /* Mount table */
-# define RT_USING_DFS_ELMFAT
+// # define RT_USING_DFS_ELMFAT
+# define RT_USING_DFS_RAMFS
 # define DFS_USING_WORKDIR
 # define DFS_FILESYSTEMS_MAX            (1)     /* Max number of fs */
 # define DFS_FD_MAX                     (4)     /* Max number of open file */
-# define RT_DFS_ELM_CODE_PAGE           437     /* (xxx) is wrong -_-! */
-# if (CONFIG_USING_EXFAT)
-#  define RT_DFS_ELM_USE_EXFAT
-# endif
-# if defined(RT_DFS_ELM_USE_EXFAT) || (RT_DFS_ELM_CODE_PAGE >= 900)
-#  define RT_DFS_ELM_USE_LFN            (2)
-#  define RT_DFS_ELM_MAX_LFN            (255)
-// #  define RT_DFS_ELM_LFN_UNICODE
-# endif /* defined(RT_DFS_ELM_USE_EXFAT) || (RT_DFS_ELM_CODE_PAGE >= 900) */
-#endif /* CONFIG_USING_SPISD */
+// # define RT_DFS_ELM_CODE_PAGE           437     /* (xxx) is wrong -_-! */
+// # if (CONFIG_USING_EXFAT)
+// #  define RT_DFS_ELM_USE_EXFAT
+// # endif
+// # if defined(RT_DFS_ELM_USE_EXFAT) || (RT_DFS_ELM_CODE_PAGE >= 900)
+// #  define RT_DFS_ELM_USE_LFN            (2)
+// #  define RT_DFS_ELM_MAX_LFN            (255)
+// // #  define RT_DFS_ELM_LFN_UNICODE
+// # endif /* defined(RT_DFS_ELM_USE_EXFAT) || (RT_DFS_ELM_CODE_PAGE >= 900) */
+#endif /* CONFIG_USING_RAMFS */
 
 
 /* Unsupported Config */

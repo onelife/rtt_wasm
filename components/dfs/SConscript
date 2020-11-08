@@ -1,0 +1,13 @@
+''' RTT WebAssembly scons conifg
+'''
+import os
+Import('env')
+
+env.Append(CPPPATH=[os.path.join('.', 'include')])
+objs = env.Object(Glob(os.path.join('src', '*.c')))
+objs += [
+    SConscript(os.path.join(d, 'SConscript'), exports='env')
+    for d in os.listdir('.') if os.path.isfile(os.path.join('.', d, 'SConscript'))
+]
+
+Return('objs')

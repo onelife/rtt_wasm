@@ -11,7 +11,7 @@ env.Tool('emscripten')
 # env.Append(CXXFLAGS='-std=c++11')
 
 env.Prepend(CPPPATH=['#'])
-env.Prepend(CCFLAGS=['-fPIC'])
+env.Prepend(CCFLAGS=['-Wall', '-fPIC'])
 env.Prepend(CPPDEFINES=rttcfg)
 env_worker = env.Clone(
     LINKFLAGS=['-s', 'MAIN_MODULE=2',

@@ -44,7 +44,7 @@ int dfs_register(const struct dfs_filesystem_ops *ops)
         /* find out an empty filesystem type entry */
         if (*iter == NULL)
             (empty == NULL) ? (empty = iter) : 0;
-        else if (strcmp((*iter)->name, ops->name) == 0)
+        else if (rt_strcmp((*iter)->name, ops->name) == 0)
         {
             rt_set_errno(-EEXIST);
             ret = -1;
@@ -98,7 +98,7 @@ struct dfs_filesystem *dfs_filesystem_lookup(const char *path)
 
         fspath = strlen(iter->path);
         if ((fspath < prefixlen)
-            || (strncmp(iter->path, path, fspath) != 0))
+            || (rt_strncmp(iter->path, path, fspath) != 0))
             continue;
 
         /* check next path separator */
@@ -242,7 +242,7 @@ int dfs_mount(const char   *device_name,
 
     for (ops = &filesystem_operation_table[0];
            ops < &filesystem_operation_table[DFS_FILESYSTEM_TYPES_MAX]; ops++)
-        if ((*ops != NULL) && (strcmp((*ops)->name, filesystemtype) == 0))
+        if ((*ops != NULL) && (rt_strcmp((*ops)->name, filesystemtype) == 0))
             break;
 
     dfs_unlock();
@@ -270,7 +270,7 @@ int dfs_mount(const char   *device_name,
     }
 
     /* Check if the path exists or not, raw APIs call, fixme */
-    if ((strcmp(fullpath, "/") != 0) && (strcmp(fullpath, "/dev") != 0))
+    if ((rt_strcmp(fullpath, "/") != 0) && (rt_strcmp(fullpath, "/dev") != 0))
     {
         struct dfs_fd fd;
 
@@ -295,7 +295,7 @@ int dfs_mount(const char   *device_name,
         if (iter->ops == NULL)
             (fs == NULL) ? (fs = iter) : 0;
         /* check if the PATH is mounted */
-        else if (strcmp(iter->path, path) == 0)
+        else if (rt_strcmp(iter->path, path) == 0)
         {
             rt_set_errno(-EINVAL);
             goto err1;
@@ -324,7 +324,7 @@ int dfs_mount(const char   *device_name,
         {
             /* The underlaying device has error, clear the entry. */
             dfs_lock();
-            memset(fs, 0, sizeof(struct dfs_filesystem));
+            rt_memset(fs, 0, sizeof(struct dfs_filesystem));
 
             goto err1;
         }
@@ -340,7 +340,7 @@ int dfs_mount(const char   *device_name,
         /* mount failed */
         dfs_lock();
         /* clear filesystem table entry */
-        memset(fs, 0, sizeof(struct dfs_filesystem));
+        rt_memset(fs, 0, sizeof(struct dfs_filesystem));
 
         goto err1;
     }
@@ -382,7 +382,7 @@ int dfs_unmount(const char *specialfile)
             iter < &filesystem_table[DFS_FILESYSTEMS_MAX]; iter++)
     {
         /* check if the PATH is mounted */
-        if ((iter->path != NULL) && (strcmp(iter->path, fullpath) == 0))
+        if ((iter->path != NULL) && (rt_strcmp(iter->path, fullpath) == 0))
         {
             fs = iter;
             break;
@@ -404,7 +404,7 @@ int dfs_unmount(const char *specialfile)
         rt_free(fs->path);
 
     /* clear this filesystem table entry */
-    memset(fs, 0, sizeof(struct dfs_filesystem));
+    rt_memset(fs, 0, sizeof(struct dfs_filesystem));
 
     dfs_unlock();
     rt_free(fullpath);
@@ -448,7 +448,7 @@ int dfs_mkfs(const char *fs_name, const char *device_name)
     for (index = 0; index <= DFS_FILESYSTEM_TYPES_MAX; index ++)
     {
         if (filesystem_operation_table[index] != NULL &&
-            strcmp(filesystem_operation_table[index]->name, fs_name) == 0)
+            rt_strcmp(filesystem_operation_table[index]->name, fs_name) == 0)
             break;
     }
     dfs_unlock();
@@ -523,18 +523,21 @@ INIT_ENV_EXPORT(dfs_mount_table);
 
 #ifdef RT_USING_FINSH
 #include "components/finsh/finsh.h"
-void mkfs(const char *fs_name, const char *device_name)
-{
-    dfs_mkfs(fs_name, device_name);
+int mkfs(int argc, char **argv) {
+    const char *fs_name = (const char *)argc;
+    const char *device_name = (const char *)argv;
+
+    return dfs_mkfs(fs_name, device_name);
 }
 FINSH_FUNCTION_EXPORT(mkfs, make a file system);
 
-int df(const char *path)
-{
+int df(int argc, char **argv) {
+    const char *path = (const char *)argc;
     int result;
     int minor = 0;
     long long cap;
     struct statfs buffer;
+    (void)argv;
 
     int unit_index = 0;
     char *unit_str[] = {"KB", "MB", "GB"};

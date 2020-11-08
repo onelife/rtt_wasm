@@ -203,11 +203,6 @@ void wasm_tick_increase(void) {
 #if CONFIG_USING_FINSH
 # include "components/finsh/shell.h"
 #endif
-#ifdef RT_USING_DFS
-# include "components/dfs/include/dfs.h"
-# include "components/dfs/include/dfs_fs.h"
-# include "components/dfs/filesystems/elmfat/dfs_elm.h"
-#endif
 #ifdef RT_USING_ULOG
 # define LOG_TAG "RTT"
 # include "components/utilities/ulog/ulog.h"
@@ -215,7 +210,14 @@ void wasm_tick_increase(void) {
 # define LOG_E(format, args...) rt_kprintf(format "\n", ##args)
 # define LOG_I(format, args...) rt_kprintf(format "\n", ##args)
 #endif
-extern int wasm_ulog_backend_init(void);
+#ifdef RT_USING_DFS
+# include "components/dfs/include/dfs.h"
+# include "components/dfs/include/dfs_fs.h"
+// # include "components/dfs/filesystems/elmfat/dfs_elm.h"
+#endif
+#ifdef RT_USING_DFS_RAMFS
+# include "components/dfs/filesystems/ramfs/dfs_ramfs.h"
+#endif
 #ifdef RT_USING_MODULE
 # include "components/libc/libdl/dlmodule.h"
 #endif
@@ -245,6 +247,7 @@ void rt_high_driver_init(void) {
 /* Component init */
 void rt_components_init(void) {
     #ifdef RT_USING_ULOG
+        extern int wasm_ulog_backend_init(void);
         (void)wasm_ulog_backend_init();
     #endif
 
@@ -259,6 +262,9 @@ void rt_components_init(void) {
     /* INIT_DEVICE_EXPORT */
 
     /* INIT_COMPONENT_EXPORT */
+    #ifdef RT_USING_DFS_RAMFS
+        (void)dfs_ramfs_init();
+    #endif
     #ifdef RT_USING_DFS_ELMFAT
         (void)elm_init();
     #endif
@@ -267,14 +273,24 @@ void rt_components_init(void) {
     #endif
 
     /* INIT_ENV_EXPORT */
-    #ifdef RT_USING_DFS_MNTTABLE
+    #if defined(RT_USING_DFS_MNTTABLE)
         // dfs_mount_table
-    #elif defined(RT_USING_DFS) && defined(RT_USING_DFS_ELMFAT)
+    #elif defined(RT_USING_DFS)
+    # ifdef RT_USING_DFS_RAMFS
+        if (dfs_mount(RT_NULL, "/", "ram", 0, dfs_ramfs_create(
+            rt_malloc(CONFIG_RAMFS_SIZE), CONFIG_RAMFS_SIZE))) {
+            LOG_E("[E] Mount RAMFS failed!");
+        } else {
+            LOG_I("Mount RAMFS to \"/\"");
+        }
+    # endif
+    # ifdef RT_USING_DFS_ELMFAT
         if (dfs_mount(SD_NAME, "/", "elm", 0, 0)) {
             LOG_E("[E] Mount " SD_NAME " failed!");
         } else {
             LOG_I("Mount " SD_NAME " to \"/\"");
         }
+    # endif
     #endif
 
     /* INIT_APP_EXPORT */
@@ -373,7 +389,9 @@ int main(void) {
     /* start scheduler */
     rt_system_scheduler_start();
 
-    emscripten_log(EM_LOG_CONSOLE, "RT-Thread in WebAssembly");
+    #ifdef RT_USING_ULOG
+        emscripten_log(EM_LOG_CONSOLE, "RT-Thread in WebAssembly");
+    #endif
     emscripten_set_main_loop(wasm_tick_increase, CONFIG_TICK_PER_SECOND, 0);
 
     return 0;

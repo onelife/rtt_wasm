@@ -119,6 +119,22 @@ int finsh_system_init(void);
     int wasm_ulog_backend_init(void);
 #endif
 
+#ifdef RT_USING_DFS
+    EMSCRIPTEN_KEEPALIVE
+    int dfs_init(void);
+    EMSCRIPTEN_KEEPALIVE
+    int dfs_mount(const char *device_name, const char *path,
+        const char *filesystemtype, unsigned long rwflag, const void *data);
+#endif
+
+#ifdef RT_USING_DFS_RAMFS
+    EMSCRIPTEN_KEEPALIVE
+    int dfs_ramfs_init(void);
+    EMSCRIPTEN_KEEPALIVE
+    struct dfs_ramfs *dfs_ramfs_create(rt_uint8_t *pool, rt_size_t size);
+#endif
+
+
 /* WebAssembly Patch */
 
 #define CONTEX_START                    \

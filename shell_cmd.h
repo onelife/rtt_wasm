@@ -75,35 +75,30 @@ ADD_FINSH_CMD(set_time, set time, set_time, rt_err_t, rt_uint32_t, rt_uint32_t, 
 ADD_MSH_CMD(date, access date and time, date, void, int argc, char **argv)
 #endif /* RT_USING_RTC */
 #ifdef RT_USING_DFS
-#error todo
-ADD_FINSH_CMD(df, show free space info of disk, df, int, const char *path)
-ADD_FINSH_CMD(list_fd, list file descriptors, list_fd, int, void)
-ADD_FINSH_CMD(mkfs, format disk with file system, mkfs, void, const char *fs_name, const char *device_name)
-ADD_FINSH_CMD(mkdir, create a directory, mkdir, int, const char *path, mode_t mode)
-ADD_FINSH_CMD(ls, list directory contents, ls, void, char *pathname)
-ADD_FINSH_CMD(rm, remove files or directories, rm, void, const char *filename)
-ADD_FINSH_CMD(copy, copy file or dir, copy, void, const char *src, const char *dst)
-ADD_FINSH_CMD(cat, print file content, cat, void, const char *filename)
-ADD_MSH_CMD(df, show free space info of disk, cmd_df, int, int argc, char **argv)
-ADD_MSH_CMD(lfd, list file descriptors, list_fd, int, void)
-ADD_MSH_CMD(mkfs, format disk with file system, cmd_mkfs, int, int argc, char **argv)
-ADD_MSH_CMD(mkdir, create a directory, cmd_mkdir, int, int argc, char **argv)
-ADD_MSH_CMD(ls, list directory contents, cmd_ls, int, int argc, char **argv)
-ADD_MSH_CMD(mv, move or rename file, cmd_mv, int, int argc, char **argv)
-ADD_MSH_CMD(rm, remove files or directories, cmd_rm, int, int argc, char **argv)
-ADD_MSH_CMD(cp, copy file or dir, cmd_cp, int, int argc, char **argv)
-ADD_MSH_CMD(cat, print file content, cmd_cat, int, int argc, char **argv)
-ADD_MSH_CMD(echo, insert string to file, cmd_echo, int, int argc, char **argv)
+ADD_FINSH_CMD(df, show free space info of disk, df)
+ADD_FINSH_CMD(list_fd, list file descriptors, list_fd)
+ADD_FINSH_CMD(mkfs, format disk with file system, mkfs)
+ADD_FINSH_CMD(mkdir, create a directory, mkdir)
+ADD_FINSH_CMD(ls, list directory contents, ls)
+ADD_FINSH_CMD(rm, remove files or directories, rm)
+ADD_FINSH_CMD(copy, copy file or dir, copy)
+ADD_FINSH_CMD(cat, print file content, cat)
+ADD_MSH_CMD(df, show free space info of disk, cmd_df)
+ADD_MSH_CMD(lfd, list file descriptors, list_fd)
+ADD_MSH_CMD(mkfs, format disk with file system, cmd_mkfs)
+ADD_MSH_CMD(mkdir, create a directory, cmd_mkdir)
+ADD_MSH_CMD(ls, list directory contents, cmd_ls)
+ADD_MSH_CMD(mv, move or rename file, cmd_mv)
+ADD_MSH_CMD(rm, remove files or directories, cmd_rm)
+ADD_MSH_CMD(cp, copy file or dir, cmd_cp)
+ADD_MSH_CMD(cat, print file content, cmd_cat)
+ADD_MSH_CMD(echo, insert string to file, cmd_echo)
 # ifdef DFS_USING_WORKDIR
-ADD_FINSH_CMD(cd, change current working directory, chdir, int, const char *path)
-ADD_MSH_CMD(cd, change current working directory, cmd_cd, int, int argc, char **argv)
-ADD_MSH_CMD(pwd, show current working directory, cmd_pwd, int, int argc, char **argv)
+ADD_FINSH_CMD(cd, change current working directory, chdir)
+ADD_MSH_CMD(cd, change current working directory, cmd_cd)
+ADD_MSH_CMD(pwd, show current working directory, cmd_pwd)
 # endif
 #endif /* RT_USING_DFS */
-#if !CONFIG_USING_DRIVER_SPI && CONFIG_USING_SPISD
-ADD_FINSH_CMD(list_sd, show SD info, list_sd, rt_err_t, void)
-ADD_MSH_CMD(lsd, show SD info, list_sd, rt_err_t, void)
-#endif
 #ifdef RT_USING_MODULE
 #error todo
 ADD_MSH_CMD(lsym, list symbols info, list_symbols, int, void)

@@ -10,10 +10,12 @@
  * 2013-05-22     Bernard      fix the no entry issue.
  */
 
-#include <rtthread.h>
-#include <dfs.h>
-#include <dfs_fs.h>
-#include <dfs_file.h>
+#include "include/rtthread.h"
+
+#ifdef RT_USING_DFS_RAMFS
+
+#include "components/dfs/include/dfs_fs.h"
+#include "components/dfs/include/dfs_file.h"
 
 #include "dfs_ramfs.h"
 
@@ -106,7 +108,7 @@ int dfs_ramfs_read(struct dfs_fd *file, void *buf, size_t count)
         length = file->size - file->pos;
 
     if (length > 0)
-        memcpy(buf, &(dirent->data[file->pos]), length);
+        rt_memcpy(buf, &(dirent->data[file->pos]), length);
 
     /* update file current position */
     file->pos += length;
@@ -143,7 +145,7 @@ int dfs_ramfs_write(struct dfs_fd *fd, const void *buf, size_t count)
     }
 
     if (count > 0)
-        memcpy(dirent->data + fd->pos, buf, count);
+        rt_memcpy(dirent->data + fd->pos, buf, count);
 
     /* update file current position */
     fd->pos += count;
@@ -228,7 +230,7 @@ int dfs_ramfs_open(struct dfs_fd *file)
                 name_ptr = file->path;
                 while (*name_ptr == '/' && *name_ptr)
                     name_ptr ++;
-                strncpy(dirent->name, name_ptr, RAMFS_NAME_MAX);
+                rt_strncpy(dirent->name, name_ptr, RAMFS_NAME_MAX);
 
                 rt_list_init(&(dirent->list));
                 dirent->data = NULL;
@@ -376,7 +378,7 @@ int dfs_ramfs_rename(struct dfs_filesystem *fs,
     if (dirent == NULL)
         return -ENOENT;
 
-    strncpy(dirent->name, newpath, RAMFS_NAME_MAX);
+    rt_strncpy(dirent->name, newpath, RAMFS_NAME_MAX);
 
     return RT_EOK;
 }
@@ -442,12 +444,13 @@ struct dfs_ramfs *dfs_ramfs_create(rt_uint8_t *pool, rt_size_t size)
     ramfs->memheap.parent.type = RT_Object_Class_MemHeap | RT_Object_Class_Static;
 
     /* initialize root directory */
-    memset(&(ramfs->root), 0x00, sizeof(ramfs->root));
+    rt_memset(&(ramfs->root), 0x00, sizeof(ramfs->root));
     rt_list_init(&(ramfs->root.list));
     ramfs->root.size = 0;
-    strcpy(ramfs->root.name, ".");
+    rt_strcpy(ramfs->root.name, ".");
     ramfs->root.fs = ramfs;
 
     return ramfs;
 }
 
+#endif /* RT_USING_DFS_RAMFS */

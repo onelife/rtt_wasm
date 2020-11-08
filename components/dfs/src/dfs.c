@@ -58,18 +58,18 @@ int dfs_init(void)
     }
 
     /* clear filesystem operations table */
-    memset((void *)filesystem_operation_table, 0, sizeof(filesystem_operation_table));
+    rt_memset((void *)filesystem_operation_table, 0, sizeof(filesystem_operation_table));
     /* clear filesystem table */
-    memset(filesystem_table, 0, sizeof(filesystem_table));
+    rt_memset(filesystem_table, 0, sizeof(filesystem_table));
     /* clean fd table */
-    memset(&_fdtab, 0, sizeof(_fdtab));
+    rt_memset(&_fdtab, 0, sizeof(_fdtab));
 
     /* create device filesystem lock */
     rt_mutex_init(&fslock, "fslock", RT_IPC_FLAG_FIFO);
 
 #ifdef DFS_USING_WORKDIR
     /* set current working directory */
-    memset(working_directory, 0, sizeof(working_directory));
+    rt_memset(working_directory, 0, sizeof(working_directory));
     working_directory[0] = '/';
 #endif
 
@@ -322,7 +322,7 @@ int fd_is_open(const char *pathname)
             fd = fdt->fds[index];
             if (fd == NULL || fd->fops == NULL || fd->path == NULL) continue;
 
-            if (fd->fs == fs && strcmp(fd->path, mountpath) == 0)
+            if (fd->fs == fs && rt_strcmp(fd->path, mountpath) == 0)
             {
                 /* found file in file descriptor table */
                 rt_free(fullpath);
@@ -521,10 +521,10 @@ struct dfs_fdtable* dfs_fdtable_get(void)
 
 #ifdef RT_USING_FINSH
 #include "components/finsh/finsh.h"
-int list_fd(void)
-{
+unsigned long list_fd(unsigned int arg) {
     int index;
     struct dfs_fdtable *fd_table;
+    (void)arg;
     
     fd_table = dfs_fdtable_get();
     if (!fd_table) return -1;
