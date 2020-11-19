@@ -12,11 +12,14 @@
 
 #include "dfs.h"
 
+#define LOG_TAG "DFS"
+#include "components/utilities/ulog/ulog.h"
+
 // #define DBG_ENABLE
-#define DBG_SECTION_NAME	"DFS"
-#define DBG_COLOR
-#define DBG_LEVEL			DBG_LOG
-#include "include/rtdbg.h"
+// #define DBG_SECTION_NAME	"DFS"
+// #define DBG_COLOR
+// #define DBG_LEVEL			DBG_LOG
+// #include "include/rtdbg.h"
 
 #define NO_WORKING_DIR  "system does not support working directory\n"
 

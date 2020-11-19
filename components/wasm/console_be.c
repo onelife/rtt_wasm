@@ -22,6 +22,7 @@
 static struct ulog_backend console;
 
 /* Private functions ---------------------------------------------------------*/
+/* Public functions ----------------------------------------------------------*/
 void wasm_ulog_backend_output(struct ulog_backend *be, rt_uint32_t lvl,
     const char *tag, rt_bool_t is_raw, const char *log, rt_size_t len) {
     int flags = EM_LOG_CONSOLE;
@@ -44,8 +45,6 @@ void wasm_ulog_backend_output(struct ulog_backend *be, rt_uint32_t lvl,
     emscripten_log(flags, log);
 }
 
-
-/* Public functions ----------------------------------------------------------*/
 int wasm_ulog_backend_init(void) {
     ulog_init();
     console.output = wasm_ulog_backend_output;

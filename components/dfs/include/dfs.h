@@ -73,6 +73,20 @@ struct statfs
     size_t f_bfree;   /* free blocks in file system */
 };
 
+#ifdef IS_MAIN_MODULE
+struct dirent;
+#else
+# ifdef __EMSCRIPTEN__
+struct dirent {
+	uint8_t d_ino[8];
+	uint8_t d_off[8];
+	uint16_t d_reclen;
+    uint8_t d_type;
+    char d_name[256];
+    uint8_t d_namlen;
+    char pad[3];
+};
+# else
 struct dirent
 {
     uint8_t d_type;           /* The type of the file */
@@ -80,6 +94,8 @@ struct dirent
     uint16_t d_reclen;        /* length of this record */
     char d_name[DFS_PATH_MAX];   /* The null-terminated file name */
 };
+# endif
+#endif
 
 struct dfs_fdtable
 {

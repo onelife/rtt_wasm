@@ -134,6 +134,11 @@ int finsh_system_init(void);
     struct dfs_ramfs *dfs_ramfs_create(rt_uint8_t *pool, rt_size_t size);
 #endif
 
+#if defined(RT_USING_DFS_MEMFS) || defined(RT_USING_DFS_IDBFS)
+    EMSCRIPTEN_KEEPALIVE
+    int dfs_wasmfs_init(void);
+#endif
+
 
 /* WebAssembly Patch */
 

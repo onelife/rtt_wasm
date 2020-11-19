@@ -183,9 +183,13 @@ struct finsh_syscall* finsh_syscall_lookup(const char* name);
  * @param desc the description of function, which will show in help.
  */
 #ifdef __EMSCRIPTEN__
-# define FINSH_FUNCTION_EXPORT(name, desc)  \
+# ifdef FINSH_USING_MSH_ONLY
+#  define FINSH_FUNCTION_EXPORT(name, desc)
+# else
+#  define FINSH_FUNCTION_EXPORT(name, desc)  \
     unsigned long fs_##name(unsigned int arg) { return name(arg, RT_NULL); } \
     FINSH_FUNCTION_EXPORT_CMD(name, fs_##name, desc)
+# endif
 #else
 # define FINSH_FUNCTION_EXPORT(name, desc)  \
     FINSH_FUNCTION_EXPORT_CMD(name, name, desc)

@@ -12,10 +12,7 @@
 #endif
 
 #include "include/rtthread.h"
-#include "include/rthw.h"
-#ifdef RT_USING_DFS
-# include "components/dfs/include/dfs_posix.h"
-#endif
+// #include "include/rthw.h"
 
 /* Will be imported from JavaScript */
 extern void wasm_console_setup_event(void);

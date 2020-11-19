@@ -12,7 +12,6 @@
 
 
 /* User Config */
-// #define CONFIG_USING_RAMFS              (1)
 
 /* WebAssembly Config */
 
@@ -56,6 +55,14 @@
 
 #ifndef CONFIG_USING_RAMFS
 # define CONFIG_USING_RAMFS             (0)
+#endif
+
+#ifndef CONFIG_USING_MEMFS
+# define CONFIG_USING_MEMFS             (0)
+#endif
+
+#ifndef CONFIG_USING_IDBFS
+# define CONFIG_USING_IDBFS             (0)
 #endif
 
 #ifndef CONFIG_USING_EXFAT
@@ -209,15 +216,23 @@
 
 /* File System Config */
 
-#if (CONFIG_USING_RAMFS)
-# define CONFIG_RAMFS_SIZE              (1024)
+#if (CONFIG_USING_MEMFS || CONFIG_USING_RAMFS || CONFIG_USING_IDBFS)
 # define RT_USING_DFS
 // # define RT_USING_DFS_MNTTABLE          /* Mount table */
-// # define RT_USING_DFS_ELMFAT
-# define RT_USING_DFS_RAMFS
 # define DFS_USING_WORKDIR
-# define DFS_FILESYSTEMS_MAX            (1)     /* Max number of fs */
+# define DFS_FILESYSTEMS_MAX            (4)     /* Max number of fs */
 # define DFS_FD_MAX                     (4)     /* Max number of open file */
+# if (CONFIG_USING_RAMFS)
+#  define RT_USING_DFS_RAMFS
+#  define CONFIG_RAMFS_SIZE             (1024)
+# endif
+# if (CONFIG_USING_MEMFS)
+#  define RT_USING_DFS_MEMFS
+# endif
+# if (CONFIG_USING_IDBFS)
+#  define RT_USING_DFS_IDBFS
+# endif
+// # define RT_USING_DFS_ELMFAT
 // # define RT_DFS_ELM_CODE_PAGE           437     /* (xxx) is wrong -_-! */
 // # if (CONFIG_USING_EXFAT)
 // #  define RT_DFS_ELM_USE_EXFAT
@@ -227,7 +242,7 @@
 // #  define RT_DFS_ELM_MAX_LFN            (255)
 // // #  define RT_DFS_ELM_LFN_UNICODE
 // # endif /* defined(RT_DFS_ELM_USE_EXFAT) || (RT_DFS_ELM_CODE_PAGE >= 900) */
-#endif /* CONFIG_USING_RAMFS */
+#endif /* (CONFIG_USING_MEMFS || CONFIG_USING_RAMFS || CONFIG_USING_IDBFS) */
 
 
 /* Unsupported Config */

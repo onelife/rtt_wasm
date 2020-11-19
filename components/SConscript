@@ -3,7 +3,9 @@
 import os
 Import('env')
 
-subdir = [os.path.join(d, 'SConscript') for d in os.listdir('.')if os.path.isfile(os.path.join('.', d, 'SConscript'))]
+subdir = [
+	os.path.join(d, 'SConscript') for d in os.listdir('.') if os.path.isfile(os.path.join('.', d, 'SConscript'))
+]
 objs = [SConscript(f, exports='env') for f in subdir]
 
 Return('objs')

@@ -80,7 +80,7 @@ int msh_exec_script(const char *cmd_line, int size)
     rt_memcpy(pg_name, cmd_line, cmd_length);
     pg_name[cmd_length] = '\0';
 
-    if (strstr(pg_name, ".sh") != RT_NULL || strstr(pg_name, ".SH") != RT_NULL)
+    if (rt_strstr(pg_name, ".sh") != RT_NULL || rt_strstr(pg_name, ".SH") != RT_NULL)
     {
         /* try to open program */
         fd = open(pg_name, O_RDONLY, 0);
